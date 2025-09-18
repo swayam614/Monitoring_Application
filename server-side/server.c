@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/socket.h> 
+#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <string.h>
@@ -197,6 +197,9 @@ void tcp_start_server(tcp_server *server)
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
+    if (server->on_tcp_server_started != NULL)
+        raise_tcp_server_started_event(server);
+
     while (server->keep_running)
     {
         client = (tcp_client *)malloc(sizeof(tcp_client));
@@ -342,6 +345,10 @@ void tcp_server_error(tcp_server *server, char **error_str)
 }
 void raise_tcp_server_started_event(tcp_server *server)
 {
+    if (server == NULL)
+        return;
+    if (server->on_tcp_server_started != NULL)
+        server->on_tcp_server_started(server->port);
 }
 void raise_tcp_server_stopped_event(tcp_server *server)
 {
@@ -380,16 +387,19 @@ void on_tcp_client_connected(tcp_server *server, void (*handler)(unsigned short 
 void tcp_server_started_handler(unsigned short int server_port)
 {
     // code that will be executed when server starts (one time act only)
+    printf("Server is ready to accept the request on port : %u\n", server_port);
 }
 
 void tcp_server_stoppped_handler(unsigned short int server_port)
 {
     // code that will be executed when server stops (one time act only)
+    printf("Server listening on port %u has stopped\n", server_port);
 }
 
 void tcp_server_client_connected_handler(unsigned short int server_port, tcp_client *connected_client)
 {
     // code that will be executed whenever a connection is accepted
+    printf("Server listening on port %u has accepted connection request\n", server_port);
 }
 
 int main()
