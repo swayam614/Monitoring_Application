@@ -116,7 +116,7 @@ tcp_server *allocate_tcp_server(unsigned short port)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    sprintf(port_str, "%d", server->port);
+    sprintf(port_str, "%u", server->port);
 
     failed_state = getaddrinfo(NULL, port_str, &hints, &ptr2top_node);
     if (failed_state == -1)
