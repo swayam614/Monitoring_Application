@@ -15,7 +15,7 @@ typedef struct _tcp_connection tcp_connection;
 tcp_connection *tcp_connect(const char *, unsigned short int);
 int tcp_connection_failed(tcp_connection *);
 void tcp_connection_error(tcp_connection *, char **error_str);
-void tcp_disconnect(tcp_connection *);
+void disconnect_tcp_connection(tcp_connection *);
 void release_tcp_connection(tcp_connection *);
 
 // following will go in client.c
@@ -151,7 +151,7 @@ void tcp_connection_error(tcp_connection *connection, char **error_str)
         *error_str = NULL;
     }
 }
-void tcp_disconnect(tcp_connection *connection)
+void disconnect_tcp_connection(tcp_connection *connection)
 {
     if (connection == NULL)
         return;
@@ -185,12 +185,13 @@ int main()
             printf("%s\n", error_str);
             free(error_str);
         }
+        disconnect_tcp_connection(connection);
         release_tcp_connection(connection);
         exit(TCP_CONNECTION_CODE_ERROR_EXIT_CODE);
     }
 
     // code to send / revice data
-    tcp_disconnect(connection);
+    disconnect_tcp_connection(connection);
     release_tcp_connection(connection);
     return 0;
 }
