@@ -112,6 +112,9 @@ void tcp_connection_error(tcp_connection *connection, char **error_str)
     char *error801 = "Invalid Port Number";
     char *error802 = "Unable to connect";
 
+    if (connection == NULL || error_str == NULL)
+        return;
+
     if (connection->error_type == 'G')
     {
         *error_str = (char *)malloc(sizeof(char) * (strlen(gai_strerror(connection->error_number)) + 1));
