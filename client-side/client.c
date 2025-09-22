@@ -122,6 +122,8 @@ void tcp_connection_error(tcp_connection *connection, char **error_str)
     char *error804 = "No data to send";
     char *error805 = "Cannot send more than 4294967291 bytes in one go";
     char *error806 = "Low memory";
+    char *error807 = "Argument is NULL";
+    char *error808 = "Connection closed by Peer";
 
     if (error_str == NULL)
         return;
@@ -182,6 +184,18 @@ void tcp_connection_error(tcp_connection *connection, char **error_str)
             *error_str = (char *)malloc(sizeof(char) * (strlen(error806) + 1));
             if (*error_str != NULL)
                 strcpy(*error_str, error806);
+        }
+        else if (connection->error_number == 807)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error807) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error807);
+        }
+        else if (connection->error_number == 808)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error808) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error808);
         }
         else
         {
@@ -299,9 +313,96 @@ void tcp_connection_send(tcp_connection *connection, const char *buffer, uint32_
 
     free(our_buffer);
 }
-char *tcp_connection_receive(tcp_connection *connection, uint32_t *buffer_size)
+char *tcp_connection_receive(tcp_connection *connection, uint32_t *received_data_size)
 {
-    return NULL;
+    ssize_t bytes_received;
+    uint32_t our_buffer_index;
+    char *our_buffer[TCP_RW_BUFFER_SIZE];
+    uint32_t network_byte_order;
+    uint32_t host_byte_order;
+    uint32_t number_of_bytes_to_receive;
+    uint32_t receive_buffer_size;
+    char *receive_buffer;
+    uint32_t receive_buffer_index;
+
+    if (connection == NULL)
+    {
+        return NULL;
+    }
+    if (received_data_size == NULL)
+    {
+        connection->error_number = 807; // Argument is NULL
+        connection->error_type = 'C';
+        return NULL;
+    }
+    *received_data_size = 0;
+    our_buffer_index = 0;
+    while (1)
+    {
+        bytes_received = recv(connection->socket_descriptor, our_buffer + our_buffer_index, TCP_RW_BUFFER_SIZE, 0);
+
+        if (bytes_received == 0)
+        {
+            connection->error_number = 808; // Connection closed by peer
+            connection->error_type = 'C';
+            return NULL;
+        }
+        else if (bytes_received == -1)
+        {
+            connection->error_number = errno;
+            connection->error_type = 'P';
+            return NULL;
+        }
+
+        our_buffer_index = our_buffer_index + bytes_received;
+        if (our_buffer_index >= 4)
+            break; // we have what we want , the header bytes
+    } // infinite loop to read atleast header bytes ends here
+
+    memcpy(&network_byte_order, our_buffer, sizeof(uint32_t));
+    host_byte_order = ntohl(network_byte_order);
+    number_of_bytes_to_receive = host_byte_order; // does not include the size of header bytes
+
+    receive_buffer_size = number_of_bytes_to_receive;
+    receive_buffer = (char *)malloc(receive_buffer_size);
+    if (receive_buffer == NULL)
+    {
+        connection->error_number = 806; // Low memory
+        connection->error_type = 'C';
+        return NULL;
+    }
+
+    receive_buffer_index = 0;
+    // pick the data from our_buffer and copy it to receive buffer if the first read count was more than 4 bytes
+
+    if (our_buffer_index > 4)
+    {
+        memcpy(receive_buffer, our_buffer + TCP_RW_HEADER_SIZE, our_buffer_index - TCP_RW_HEADER_SIZE);
+        receive_buffer_index = our_buffer_index - TCP_RW_HEADER_SIZE;
+    }
+    number_of_bytes_to_receive = number_of_bytes_to_receive - (our_buffer_index - TCP_RW_HEADER_SIZE);
+    while (number_of_bytes_to_receive > 0)
+    {
+        bytes_received = recv(connection->socket_descriptor, receive_buffer + receive_buffer_index, TCP_RW_BUFFER_SIZE, 0);
+        if (bytes_received == 0)
+        {
+            connection->error_number = 808; // connection closed by peer
+            connection->error_type = 'C';
+            free(receive_buffer);
+            return NULL;
+        }
+        else if (bytes_received == -1)
+        {
+            connection->error_number = errno;
+            connection->error_type = 'P';
+            free(receive_buffer);
+            return NULL;
+        }
+        receive_buffer_index = receive_buffer_index + bytes_received;
+        number_of_bytes_to_receive = number_of_bytes_to_receive - bytes_received;
+    } // loop to receive all bytes end here
+    *received_data_size = receive_buffer_size;
+    return receive_buffer;
 }
 
 // following is the code to test the client implementation of network layer
