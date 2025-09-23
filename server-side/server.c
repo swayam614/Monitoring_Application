@@ -12,6 +12,10 @@
 
 #define TCP_SERVER_ERROR_EXIT_CODE 54
 #define BACKLOG_QUEUE_SIZE 100
+#define TCP_RW_BUFFER_SIZE 16384
+#define TCP_RW_HEADER_SIZE 4
+#define TCP_SEND_LIMIT 4294967295 - TCP_RW_HEADER_SIZE
+
 // very very important part , the header file will contain struct declaration not defination
 // following declaration are called forward declaration , definations will be in libaray
 
@@ -28,9 +32,17 @@ void tcp_start_server(tcp_server *);
 void tcp_stop_server(tcp_server *);
 void *request_processor(void *);
 
+void disconnect_tcp_client(tcp_client *);
+void release_tcp_client(tcp_client *);
+
+void tcp_client_send(tcp_client *, const char *, uint32_t);
+char *tcp_client_receive(tcp_client *, uint32_t *);
+
 // error related functions
 int tcp_server_failed(tcp_server *);
 void tcp_server_error(tcp_server *, char **);
+int tcp_client_failed(tcp_client *);
+void tcp_client_error(tcp_client *, char **);
 
 // functions for raising event
 void raise_tcp_server_stopped_event(tcp_server *);
@@ -60,8 +72,11 @@ typedef struct _tcp_server
 typedef struct _tcp_client
 {
     int socket_descriptor;
+    int socket_descriptor_closed;
     struct sockaddr_storage client_sockaddr_storage;
     socklen_t client_sockaddr_size;
+    int error_number;
+    char error_type;
 
     struct _tcp_server *server;
 
@@ -226,6 +241,10 @@ void tcp_start_server(tcp_server *server)
         }
 
         client->server = server;
+        client->socket_descriptor_closed = 0; // false it is not closed
+        client->error_number = 0;
+        client->error_type = ' ';
+
         error_number = pthread_create(&thread_id, &thread_attr, request_processor, (void *)client);
         if (error_number != 0)
         {
@@ -277,19 +296,27 @@ int tcp_server_failed(tcp_server *server) // returns true/yes (1) and no/false (
 
 void tcp_server_error(tcp_server *server, char **error_str)
 {
+    char *error900 = "Connection not established";
     char *error901 = "Invalid port number";
     char *error902 = "Unable to create socket";
     char *error903 = "Client Handler not configured via on_tcp_client_connected_functions, refer documentation";
     char *error904 = "Low memory resources , cannot perform operations";
     char *error905 = "Unable to create connection handler because of low resources or insufficient thread permissions";
-    if (server == NULL || error_str == NULL)
+
+    if (error_str == NULL)
         return;
-    if (server->error_number == 0)
+    if (server == NULL)
+    {
+        *error_str = (char *)malloc(sizeof(char) * (strlen(error900) + 1));
+        if (*error_str != NULL)
+            strcpy(*error_str, error900);
+    }
+    else if (server->error_number == 0)
     {
         *error_str = NULL;
         return;
     }
-    if (server->error_type == 'G')
+    else if (server->error_type == 'G')
     {
         *error_str = (char *)malloc(sizeof(char) * (strlen(gai_strerror(server->error_number)) + 1));
         if (*error_str != NULL)
@@ -343,6 +370,318 @@ void tcp_server_error(tcp_server *server, char **error_str)
         *error_str = NULL; // this will not happen
     }
 }
+
+// -------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------
+
+int tcp_client_failed(tcp_client *client)
+{
+    if (client == NULL || client->error_number != 0)
+        return 1; // yes something failed
+    return 0;
+}
+
+void tcp_client_error(tcp_client *client, char **error_str)
+{
+    char *error800 = "Connection not established";
+    char *error801 = "Invalid Port Number";
+    char *error802 = "Unable to connect";
+    char *error803 = "Connection is closed or not yet established";
+    char *error804 = "No data to send";
+    char *error805 = "Cannot send more than 4294967291 bytes in one go";
+    char *error806 = "Low memory";
+    char *error807 = "Argument is NULL";
+    char *error808 = "Connection closed by Peer";
+
+    if (error_str == NULL)
+        return;
+
+    if (client == NULL)
+    {
+        *error_str = (char *)malloc(sizeof(char) * (strlen(error800) + 1));
+        if (*error_str != NULL)
+            strcpy(*error_str, error800);
+    }
+
+    else if (client->error_type == 'G')
+    {
+        *error_str = (char *)malloc(sizeof(char) * (strlen(gai_strerror(client->error_number)) + 1));
+        if (*error_str != NULL)
+            strcpy(*error_str, gai_strerror(client->error_number));
+    }
+    else if (client->error_type == 'P')
+    {
+        *error_str = (char *)malloc(sizeof(char) * (strlen(strerror(client->error_number)) + 1));
+        if (*error_str != NULL)
+            strcpy(*error_str, strerror(client->error_number));
+    }
+    else if (client->error_type == 'C')
+    {
+        if (client->error_number == 801)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error801) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error801);
+        }
+        else if (client->error_number == 802)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error802) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error802);
+        }
+        else if (client->error_number == 803)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error803) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error803);
+        }
+        else if (client->error_number == 804)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error804) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error804);
+        }
+        else if (client->error_number == 805)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error805) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error805);
+        }
+        else if (client->error_number == 806)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error806) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error806);
+        }
+        else if (client->error_number == 807)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error807) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error807);
+        }
+        else if (client->error_number == 808)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error808) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error808);
+        }
+        else
+        {
+            *error_str = NULL;
+        }
+    }
+    else
+    {
+        *error_str = NULL;
+    }
+}
+void disconnect_tcp_client(tcp_client *client)
+{
+    if (client == NULL)
+        return;
+    if (client->socket_descriptor_closed == 0) // it means not closed 0 is false
+    {
+        close(client->socket_descriptor);
+        client->socket_descriptor_closed = 1; // yes not it is closed
+        client->socket_descriptor = 0;
+    }
+}
+
+void release_tcp_client(tcp_client *client)
+{
+    if (client == NULL)
+        return;
+    if (client->socket_descriptor_closed == 0)
+        close(client->socket_descriptor);
+    free(client);
+}
+
+void tcp_client_send(tcp_client *client, const char *buffer, uint32_t buffer_size)
+{
+    uint32_t our_buffer_size;
+    uint32_t our_buffer_index;
+    uint32_t buffer_index;
+    char *our_buffer;
+    uint32_t pick_in_this_cycle;
+    uint32_t number_of_bytes_to_send;
+    ssize_t bytes_sent;
+    uint32_t network_byte_order;
+
+    if (client == NULL)
+    {
+        return;
+    }
+    if (client->socket_descriptor_closed == 1)
+    {
+        client->error_number = 803; // connection is closed or not yet established
+        client->error_type = 'C';
+        return;
+    }
+    if (buffer == NULL || buffer_size == 0)
+    {
+        client->error_number = 804; // No data to send
+        client->error_type = 'C';
+        return;
+    }
+    if (buffer_size > TCP_SEND_LIMIT)
+    {
+        client->error_number = 805; // Cannot send more than 4294967291 bytes in one go
+        client->error_type = 'C';
+        return;
+    }
+
+    if (buffer_size + TCP_RW_HEADER_SIZE <= TCP_RW_BUFFER_SIZE)
+    {
+        our_buffer_size = buffer_size + TCP_RW_HEADER_SIZE;
+    }
+    else
+    {
+        our_buffer_size = TCP_RW_BUFFER_SIZE;
+    }
+
+    our_buffer = (char *)malloc(our_buffer_size);
+    if (our_buffer == NULL)
+    {
+        client->error_number = 806; // low memory
+        client->error_type = 'C';
+        return;
+    }
+
+    network_byte_order = htonl(buffer_size);
+    memcpy(our_buffer, &network_byte_order, sizeof(uint32_t));
+
+    number_of_bytes_to_send = buffer_size + TCP_RW_HEADER_SIZE;
+    our_buffer_index = TCP_RW_HEADER_SIZE; // 0,1,2 and 3 are used for header
+    buffer_index = 0;
+
+    while (number_of_bytes_to_send > 0)
+    {
+        if (number_of_bytes_to_send > (our_buffer_size - TCP_RW_HEADER_SIZE))
+        {
+            pick_in_this_cycle = our_buffer_size - our_buffer_index;
+        }
+        else
+        {
+            pick_in_this_cycle = number_of_bytes_to_send - our_buffer_index;
+        }
+        memcpy(our_buffer + our_buffer_index, buffer + buffer_index, pick_in_this_cycle);
+        bytes_sent = send(client->socket_descriptor, our_buffer, our_buffer_index + pick_in_this_cycle, 0);
+        if (bytes_sent == -1)
+        {
+            // some issue, it can be because of some raised signal or some other serious issue
+            // we will abort the send process , we dont retry
+            client->error_number = errno;
+            client->error_type = 'G';
+            free(our_buffer);
+            return;
+        }
+        buffer_index = buffer_index + bytes_sent - our_buffer_index;
+        our_buffer_index = 0;
+        number_of_bytes_to_send = number_of_bytes_to_send - bytes_sent;
+    } // loop to send data chunks , ends here
+
+    free(our_buffer);
+}
+
+char *tcp_client_receive(tcp_client *client, uint32_t *received_data_size)
+{
+    ssize_t bytes_received;
+    uint32_t our_buffer_index;
+    char *our_buffer[TCP_RW_BUFFER_SIZE];
+    uint32_t network_byte_order;
+    uint32_t host_byte_order;
+    uint32_t number_of_bytes_to_receive;
+    uint32_t receive_buffer_size;
+    char *receive_buffer;
+    uint32_t receive_buffer_index;
+
+    if (client == NULL)
+    {
+        return NULL;
+    }
+    if (received_data_size == NULL)
+    {
+        client->error_number = 807; // Argument is NULL
+        client->error_type = 'C';
+        return NULL;
+    }
+    *received_data_size = 0;
+    our_buffer_index = 0;
+    while (1)
+    {
+        bytes_received = recv(client->socket_descriptor, our_buffer + our_buffer_index, TCP_RW_BUFFER_SIZE, 0);
+
+        if (bytes_received == 0)
+        {
+            client->error_number = 808; // Connection closed by peer
+            client->error_type = 'C';
+            return NULL;
+        }
+        else if (bytes_received == -1)
+        {
+            client->error_number = errno;
+            client->error_type = 'P';
+            return NULL;
+        }
+
+        our_buffer_index = our_buffer_index + bytes_received;
+        if (our_buffer_index >= 4)
+            break; // we have what we want , the header bytes
+    } // infinite loop to read atleast header bytes ends here
+
+    memcpy(&network_byte_order, our_buffer, sizeof(uint32_t));
+    host_byte_order = ntohl(network_byte_order);
+    number_of_bytes_to_receive = host_byte_order; // does not include the size of header bytes
+
+    receive_buffer_size = number_of_bytes_to_receive;
+    receive_buffer = (char *)malloc(receive_buffer_size);
+    if (receive_buffer == NULL)
+    {
+        client->error_number = 806; // Low memory
+        client->error_type = 'C';
+        return NULL;
+    }
+
+    receive_buffer_index = 0;
+    // pick the data from our_buffer and copy it to receive buffer if the first read count was more than 4 bytes
+
+    if (our_buffer_index > 4)
+    {
+        memcpy(receive_buffer, our_buffer + TCP_RW_HEADER_SIZE, our_buffer_index - TCP_RW_HEADER_SIZE);
+        receive_buffer_index = our_buffer_index - TCP_RW_HEADER_SIZE;
+    }
+    number_of_bytes_to_receive = number_of_bytes_to_receive - (our_buffer_index - TCP_RW_HEADER_SIZE);
+    while (number_of_bytes_to_receive > 0)
+    {
+        bytes_received = recv(client->socket_descriptor, receive_buffer + receive_buffer_index, TCP_RW_BUFFER_SIZE, 0);
+        if (bytes_received == 0)
+        {
+            client->error_number = 808; // connection closed by peer
+            client->error_type = 'C';
+            free(receive_buffer);
+            return NULL;
+        }
+        else if (bytes_received == -1)
+        {
+            client->error_number = errno;
+            client->error_type = 'P';
+            free(receive_buffer);
+            return NULL;
+        }
+        receive_buffer_index = receive_buffer_index + bytes_received;
+        number_of_bytes_to_receive = number_of_bytes_to_receive - bytes_received;
+    } // loop to receive all bytes end here
+    *received_data_size = receive_buffer_size;
+    return receive_buffer;
+}
+
+// -------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------
+
 void raise_tcp_server_started_event(tcp_server *server)
 {
     if (server == NULL)
@@ -399,7 +738,63 @@ void tcp_server_stoppped_handler(unsigned short int server_port)
 void tcp_server_client_connected_handler(unsigned short int server_port, tcp_client *connected_client)
 {
     // code that will be executed whenever a connection is accepted
+    char *error_str;
+    char *request;
+    uint32_t request_size;
+    uint32_t i;
+    char data[250000]; 
+
     printf("Server listening on port %u has accepted connection request\n", server_port);
+
+    // code to receive request data starts here
+
+    request = tcp_client_receive(connected_client, &request_size);
+    if (tcp_client_failed(connected_client))
+    {
+        tcp_client_error(connected_client, &error_str);
+        if (error_str != NULL)
+        {
+            printf("%s\n", error_str);
+            free(error_str);
+        }
+        disconnect_tcp_client(connected_client);
+        release_tcp_client(connected_client);
+        return;
+    }
+
+    printf("Number of bytes received in request %u\n", request_size);
+    for (i = 0; i < request_size; i++)
+    {
+        printf("%c", request[i]);
+    }
+    printf("\n"); // to ensure that all bytes get printed as \n ensures that the
+                  // contents of internl buffer are flushed to output stream (stdout)
+    // we will assume that the data in request has been processed over here
+    free(request); // this has to be well documented
+    // code to receive request data ends here
+
+    // code to send response data
+
+    for (i = 0; i < 250000; i++) // loop to populate dummy data
+    {
+        data[i] = (char)((i % 10) + 48);
+    }
+
+    tcp_client_send(connected_client, data, 250000);
+    if (tcp_client_failed(connected_client))
+    {
+        tcp_client_error(connected_client, &error_str);
+        if (error_str != NULL)
+        {
+            printf("%s\n", error_str);
+            free(error_str);
+        }
+        disconnect_tcp_client(connected_client);
+        release_tcp_client(connected_client);
+        return;
+    }
+
+    // code to send response data ends here
 }
 
 int main()
