@@ -18,7 +18,7 @@ typedef struct _tcp_connection tcp_connection;
 
 tcp_connection *tcp_connect(const char *, unsigned short int);
 int tcp_connection_failed(tcp_connection *);
-void tcp_connection_error(tcp_connection *, char **error_str);
+void tcp_connection_error(tcp_connection *, char **);
 void disconnect_tcp_connection(tcp_connection *);
 void release_tcp_connection(tcp_connection *);
 
@@ -287,7 +287,7 @@ void tcp_connection_send(tcp_connection *connection, const char *buffer, uint32_
 
     while (number_of_bytes_to_send > 0)
     {
-        if (number_of_bytes_to_send > (our_buffer_size - TCP_RW_HEADER_SIZE))
+        if (number_of_bytes_to_send > (our_buffer_size - our_buffer_index))
         {
             pick_in_this_cycle = our_buffer_size - our_buffer_index;
         }
@@ -317,7 +317,7 @@ char *tcp_connection_receive(tcp_connection *connection, uint32_t *received_data
 {
     ssize_t bytes_received;
     uint32_t our_buffer_index;
-    char *our_buffer[TCP_RW_BUFFER_SIZE];
+    char our_buffer[TCP_RW_BUFFER_SIZE];
     uint32_t network_byte_order;
     uint32_t host_byte_order;
     uint32_t number_of_bytes_to_receive;
@@ -431,12 +431,34 @@ int main()
 
     // code to send request data
 
-    for (i = 0; i < 500000; i++)
-    {
-        data[i] = (char)((i % 10) + 48);
-    }
+    // for (i = 0; i < 500000; i++) // loop to populat dummy data
+    // {
+    //     data[i] = (char)((i % 10) + 48);
+    // }
 
-    tcp_connection_send(connection, data, 500000);
+    // tcp_connection_send(connection, data, 500000);
+
+    strcpy(data, "Hello I am client of yours , I wish to ask a question related to a product\n");
+    strcat(data, "1. I live in Bangalore. Bangalore is famous for tech jobs. It is very cool place\n");
+    strcat(data, "2. The worst thing is traffic pf bangalore\n");
+    strcat(data, "3. Where i am living is electronic city which is 55 km far from airport\n");
+    strcat(data, "4. I live in Bangalore. Bangalore is famous for tech jobs. It is very cool place\n");
+    strcat(data, "5. The worst thing is traffic pf bangalore\n");
+    strcat(data, "6. Where i am living is electronic city which is 55 km far from airport\n");
+    strcat(data, "7. I live in Bangalore. Bangalore is famous for tech jobs. It is very cool place\n");
+    strcat(data, "8. The worst thing is traffic pf bangalore\n");
+    strcat(data, "9. Where i am living is electronic city which is 55 km far from airport\n");
+    strcat(data, "10. I live in Bangalore. Bangalore is famous for tech jobs. It is very cool place\n");
+    strcat(data, "11. The worst thing is traffic pf bangalore\n");
+    strcat(data, "12. Where i am living is electronic city which is 55 km far from airport\n");
+    strcat(data, "13. I live in Bangalore. Bangalore is famous for tech jobs. It is very cool place\n");
+    strcat(data, "14. The worst thing is traffic pf bangalore\n");
+    strcat(data, "15. Where i am living is electronic city which is 55 km far from airport\n");
+    strcat(data, "16. I live in Bangalore. Bangalore is famous for tech jobs. It is very cool place\n");
+    strcat(data, "17. The worst thing is traffic pf bangalore\n");
+    strcat(data, "18. Where i am living is electronic city which is 55 km far from airport\n");
+
+    tcp_connection_send(connection, data, strlen(data));
     if (tcp_connection_failed(connection))
     {
         tcp_connection_error(connection, &error_str);

@@ -558,7 +558,7 @@ void tcp_client_send(tcp_client *client, const char *buffer, uint32_t buffer_siz
 
     while (number_of_bytes_to_send > 0)
     {
-        if (number_of_bytes_to_send > (our_buffer_size - TCP_RW_HEADER_SIZE))
+        if (number_of_bytes_to_send > (our_buffer_size - our_buffer_index))
         {
             pick_in_this_cycle = our_buffer_size - our_buffer_index;
         }
@@ -589,7 +589,7 @@ char *tcp_client_receive(tcp_client *client, uint32_t *received_data_size)
 {
     ssize_t bytes_received;
     uint32_t our_buffer_index;
-    char *our_buffer[TCP_RW_BUFFER_SIZE];
+    char our_buffer[TCP_RW_BUFFER_SIZE];
     uint32_t network_byte_order;
     uint32_t host_byte_order;
     uint32_t number_of_bytes_to_receive;
@@ -742,7 +742,7 @@ void tcp_server_client_connected_handler(unsigned short int server_port, tcp_cli
     char *request;
     uint32_t request_size;
     uint32_t i;
-    char data[250000]; 
+    char data[250000];
 
     printf("Server listening on port %u has accepted connection request\n", server_port);
 
@@ -775,12 +775,43 @@ void tcp_server_client_connected_handler(unsigned short int server_port, tcp_cli
 
     // code to send response data
 
-    for (i = 0; i < 250000; i++) // loop to populate dummy data
-    {
-        data[i] = (char)((i % 10) + 48);
-    }
+    // for (i = 0; i < 250000; i++) // loop to populate dummy data
+    // {
+    //     data[i] = (char)((i % 10) + 48);
+    // }
 
-    tcp_client_send(connected_client, data, 250000);
+    // tcp_client_send(connected_client, data, 250000);
+
+    strcpy(data, "Thank You for contacting Swayam Palrecha Server. I feel great\n");
+    strcat(data, "1. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "2. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "3. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "4. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "5. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "6. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "7. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "8. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "9. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "10. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "11. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "12. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "13. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "14. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "15. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "16. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "17. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "18. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "19. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "20. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "21. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "22. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "23. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "24. enquiry. Our Sales person will be happy to help you whenever required\n");
+    strcat(data, "25. We have great products to offer. We have electronic products , stationery\n");
+    strcat(data, "26. We also deal in computers and printers. You can call us any time for product\n");
+    strcat(data, "27. enquiry. Our Sales person will be happy to help you whenever required\n");
+
+    tcp_client_send(connected_client, data, strlen(data));
     if (tcp_client_failed(connected_client))
     {
         tcp_client_error(connected_client, &error_str);
