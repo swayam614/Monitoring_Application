@@ -24,6 +24,11 @@ void release_tcp_connection(tcp_connection *);
 
 void tcp_connection_send(tcp_connection *, const char *, uint32_t);
 char *tcp_connection_receive(tcp_connection *, uint32_t *);
+
+char *tcp_connection_get_local_ip(tcp_connection *);
+unsigned short int tcp_connection_get_local_port(tcp_connection *);
+char *tcp_connection_get_remote_ip(tcp_connection *);
+unsigned short int tcp_connection_get_remote_port(tcp_connection *);
 // following will go in client.c
 
 typedef struct _tcp_connection
@@ -124,6 +129,10 @@ void tcp_connection_error(tcp_connection *connection, char **error_str)
     char *error806 = "Low memory";
     char *error807 = "Argument is NULL";
     char *error808 = "Connection closed by Peer";
+    char *error809 = "Cannot determine remote IP";
+    char *error810 = "Cannot determine remote port";
+    char *error811 = "Cannot determine local IP";
+    char *error812 = "Cannot determine local port";
 
     if (error_str == NULL)
         return;
@@ -196,6 +205,30 @@ void tcp_connection_error(tcp_connection *connection, char **error_str)
             *error_str = (char *)malloc(sizeof(char) * (strlen(error808) + 1));
             if (*error_str != NULL)
                 strcpy(*error_str, error808);
+        }
+        else if (connection->error_number == 809)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error809) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error809);
+        }
+        else if (connection->error_number == 810)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error810) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error810);
+        }
+        else if (connection->error_number == 811)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error811) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error811);
+        }
+        else if (connection->error_number == 812)
+        {
+            *error_str = (char *)malloc(sizeof(char) * (strlen(error812) + 1));
+            if (*error_str != NULL)
+                strcpy(*error_str, error812);
         }
         else
         {
@@ -405,6 +438,158 @@ char *tcp_connection_receive(tcp_connection *connection, uint32_t *received_data
     return receive_buffer;
 }
 
+char *tcp_connection_get_local_ip(tcp_connection *connection)
+{
+    char *local_ip;
+    char *t;
+    int return_value;
+    struct sockaddr_storage client_sockaddr_storage;
+    socklen_t client_sockaddr_size;
+    struct sockaddr_in *client_sockaddr_in;
+
+    if (connection == NULL)
+        return NULL;
+
+    client_sockaddr_size = sizeof(struct sockaddr_storage);
+
+    return_value = getsockname(connection->socket_descriptor, (struct sockaddr *)&(client_sockaddr_storage), &client_sockaddr_size);
+    if (return_value != 0)
+    {
+        connection->error_number = 811; // cannot determine local ip
+        connection->error_type = 'C';
+        return NULL;
+    }
+
+    if (client_sockaddr_size <= sizeof(struct sockaddr_storage))
+    {
+        if (client_sockaddr_storage.ss_family == AF_INET)
+        {
+            client_sockaddr_in = (struct sockaddr_in *)&(client_sockaddr_storage);
+            t = inet_ntoa(client_sockaddr_in->sin_addr);
+            local_ip = (char *)malloc(sizeof(char) * (strlen(t) + 1));
+            if (local_ip == NULL)
+            {
+                connection->error_number = 806; // Low memory
+                connection->error_type = 'C';
+                return NULL;
+            }
+            strcpy(local_ip, t);
+            return local_ip;
+        }
+    }
+    connection->error_number = 811; // Cannot determine local ip
+    connection->error_type = 'C';
+    return NULL;
+}
+
+unsigned short int tcp_connection_get_local_port(tcp_connection *connection)
+{
+    int return_value;
+    struct sockaddr_storage client_sockaddr_storage;
+    socklen_t client_sockaddr_size;
+    struct sockaddr_in *client_sockaddr_in;
+
+    if (connection == NULL)
+        return 0;
+
+    client_sockaddr_size = sizeof(struct sockaddr_storage);
+    return_value = getsockname(connection->socket_descriptor, (struct sockaddr *)&(client_sockaddr_storage), &client_sockaddr_size);
+    if (return_value != 0)
+    {
+        connection->error_number = 812; // cannot determine local port
+        connection->error_type = 'C';
+        return 0;
+    }
+
+    if (client_sockaddr_size <= sizeof(struct sockaddr_storage))
+    {
+        if (client_sockaddr_storage.ss_family == AF_INET)
+        {
+            client_sockaddr_in = (struct sockaddr_in *)&(client_sockaddr_storage);
+            return ntohs(client_sockaddr_in->sin_port);
+        }
+    }
+    connection->error_number = 812; // Cannot determine local port
+    connection->error_type = 'C';
+    return 0;
+}
+
+char *tcp_connection_get_remote_ip(tcp_connection *connection)
+{
+    char *remote_ip;
+    char *t;
+    int return_value;
+    struct sockaddr_storage client_sockaddr_storage;
+    socklen_t client_sockaddr_size;
+    struct sockaddr_in *client_sockaddr_in;
+
+    if (connection == NULL)
+        return NULL;
+
+    client_sockaddr_size = sizeof(struct sockaddr_storage);
+
+    return_value = getpeername(connection->socket_descriptor, (struct sockaddr *)&(client_sockaddr_storage), &client_sockaddr_size);
+    if (return_value != 0)
+    {
+        connection->error_number = 809; // cannot determine remote ip
+        connection->error_type = 'C';
+        return NULL;
+    }
+
+    if (client_sockaddr_size <= sizeof(struct sockaddr_storage))
+    {
+        if (client_sockaddr_storage.ss_family == AF_INET)
+        {
+            client_sockaddr_in = (struct sockaddr_in *)&(client_sockaddr_storage);
+            t = inet_ntoa(client_sockaddr_in->sin_addr);
+            remote_ip = (char *)malloc(sizeof(char) * (strlen(t) + 1));
+            if (remote_ip == NULL)
+            {
+                connection->error_number = 806; // Low memory
+                connection->error_type = 'C';
+                return NULL;
+            }
+            strcpy(remote_ip, t);
+            return remote_ip;
+        }
+    }
+    connection->error_number = 809; // Cannot determine remote ip
+    connection->error_type = 'C';
+    return NULL;
+}
+
+unsigned short int tcp_connection_get_remote_port(tcp_connection *connection)
+{
+    int return_value;
+    struct sockaddr_storage client_sockaddr_storage;
+    socklen_t client_sockaddr_size;
+    struct sockaddr_in *client_sockaddr_in;
+
+    if (connection == NULL)
+        return 0;
+
+    client_sockaddr_size = sizeof(struct sockaddr_storage);
+    return_value = getpeername(connection->socket_descriptor, (struct sockaddr *)&(client_sockaddr_storage), &client_sockaddr_size);
+    if (return_value != 0)
+    {
+        connection->error_number = 810; // cannot determine remote port
+        connection->error_type = 'C';
+        return 0;
+    }
+
+    if (client_sockaddr_size <= sizeof(struct sockaddr_storage))
+    {
+        if (client_sockaddr_storage.ss_family == AF_INET)
+        {
+            client_sockaddr_in = (struct sockaddr_in *)&(client_sockaddr_storage);
+            return ntohs(client_sockaddr_in->sin_port);
+        }
+    }
+    connection->error_number = 810; // Cannot determine remote port
+    connection->error_type = 'C';
+    return 0;
+}
+
 // following is the code to test the client implementation of network layer
 
 int main()
@@ -414,6 +599,8 @@ int main()
     int i;
     char *response;
     uint32_t response_size;
+    char *local_ip, *remote_ip;
+    unsigned short int local_port, remote_port;
 
     tcp_connection *connection = tcp_connect("localhost", 5046);
     if (tcp_connection_failed(connection))
@@ -427,6 +614,68 @@ int main()
         disconnect_tcp_connection(connection); // if you want this line can be removed
         release_tcp_connection(connection);
         exit(TCP_CONNECTION_CODE_ERROR_EXIT_CODE);
+    }
+
+    remote_ip = tcp_connection_get_remote_ip(connection);
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &error_str);
+        if (error_str != NULL)
+        {
+            printf("%s\n", error_str);
+            free(error_str);
+        }
+    }
+    else
+    {
+        printf("Remote IP address : %s\n", remote_ip);
+        free(remote_ip);
+    }
+
+    remote_port = tcp_connection_get_remote_port(connection);
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &error_str);
+        if (error_str != NULL)
+        {
+            printf("%s\n", error_str);
+            free(error_str);
+        }
+    }
+    else
+    {
+        printf("Remote PORT number : %u\n", remote_port);
+    }
+
+    local_ip = tcp_connection_get_local_ip(connection);
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &error_str);
+        if (error_str != NULL)
+        {
+            printf("%s\n", error_str);
+            free(error_str);
+        }
+    }
+    else
+    {
+        printf("Local IP address : %s\n", local_ip);
+        free(local_ip);
+    }
+
+    local_port = tcp_connection_get_local_port(connection);
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &error_str);
+        if (error_str != NULL)
+        {
+            printf("%s\n", error_str);
+            free(error_str);
+        }
+    }
+    else
+    {
+        printf("Local PORT number : %u\n", local_port);
     }
 
     // code to send request data
