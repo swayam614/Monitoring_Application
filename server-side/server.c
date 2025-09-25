@@ -245,6 +245,13 @@ void tcp_start_server(tcp_server *server)
             break; // unable to accept connection we can retry I choose to leave break off from loop
         }
 
+        if (server->keep_running == 0)
+        {
+            close(client->socket_descriptor);
+            free(client);
+            break;
+        }
+
         client->server = server;
         client->socket_descriptor_closed = 0; // false it is not closed
         client->error_number = 0;
@@ -277,9 +284,52 @@ void tcp_start_server(tcp_server *server)
 
 void tcp_stop_server(tcp_server *server)
 {
+
+    char port_str[6];
+    struct addrinfo hints;
+    struct addrinfo *ptr2top_node;
+    struct addrinfo *temp;
+    int failed_state;
+    int socket_descriptor;
+
     if (server == NULL)
         return;
     server->keep_running = 0;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    sprintf(port_str, "%u", server->port);
+
+    failed_state = getaddrinfo("localhost", port_str, &hints, &ptr2top_node);
+    if (failed_state == -1)
+    {
+        return;
+    }
+
+    for (temp = ptr2top_node; temp != NULL; temp = temp->ai_next)
+    {
+        socket_descriptor = socket(temp->ai_family, temp->ai_socktype, temp->ai_protocol);
+        if (socket_descriptor == -1)
+            continue;
+
+        failed_state = connect(socket_descriptor, temp->ai_addr, temp->ai_addrlen);
+
+        if (failed_state == -1)
+        {
+            close(socket_descriptor);
+            continue;
+        }
+        break;
+    }
+
+    free(ptr2top_node);
+    if (temp == NULL)
+    {
+        return;
+    }
+    close(socket_descriptor);
 }
 
 void *request_processor(void *gen_ptr)
@@ -993,6 +1043,16 @@ void tcp_server_client_connected_handler(unsigned short int server_port, tcp_cli
     printf("\n"); // to ensure that all bytes get printed as \n ensures that the
                   // contents of internl buffer are flushed to output stream (stdout)
     // we will assume that the data in request has been processed over here
+
+    if (strncmp(request, "shutdown-server", request_size) == 0)
+    {
+        tcp_stop_server(connected_client->server);
+        disconnect_tcp_client(connected_client);
+        release_tcp_client(connected_client);
+        free(request);
+        return;
+    }
+
     free(request); // this has to be well documented
     // code to receive request data ends here
 
@@ -1004,6 +1064,8 @@ void tcp_server_client_connected_handler(unsigned short int server_port, tcp_cli
     // }
 
     // tcp_client_send(connected_client, data, 250000);
+
+    sleep(20);
 
     strcpy(data, "Thank You for contacting Swayam Palrecha Server. I feel great\n");
     strcat(data, "1. We have great products to offer. We have electronic products , stationery\n");
