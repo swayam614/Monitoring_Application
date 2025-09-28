@@ -199,6 +199,8 @@ void release_tcp_server(tcp_server *server)
 
 void tcp_start_server(tcp_server *server)
 {
+    int accept_failure_counter;
+    int low_memory_counter;
     int error_number;
     pthread_attr_t thread_attr;
     pthread_t thread_id;
@@ -220,19 +222,23 @@ void tcp_start_server(tcp_server *server)
     if (server->on_tcp_server_started != NULL)
         raise_tcp_server_started_event(server);
 
+    low_memory_counter = 0;
+    accept_failure_counter = 0;
     while (server->keep_running)
     {
         client = (tcp_client *)malloc(sizeof(tcp_client));
         if (client == NULL)
         {
-            // this may happen on the nth cycle , we are in no position to accept the connection
-            // as memoery is low
-            // we can either try after some time or choose to leave
-            // I choose to leave
-            server->error_number = 904;
-            server->error_type = 'C';
-            break; //  break off from the infinite loop
+            if (low_memory_counter == 60 * 3)
+            {
+                server->keep_running = 0;
+                break;
+            }
+            sleep(1);
+            low_memory_counter++;
+            continue;
         }
+        low_memory_counter = 0;
 
         client->client_sockaddr_size = sizeof(struct sockaddr_storage);
         client->socket_descriptor = accept(server->socket_descriptor, (struct sockaddr *)&(client->client_sockaddr_storage), &(client->client_sockaddr_size));
@@ -240,10 +246,15 @@ void tcp_start_server(tcp_server *server)
         if (client->socket_descriptor == -1)
         {
             free(client);
-            server->error_number = errno;
-            server->error_type = 'P';
-            break; // unable to accept connection we can retry I choose to leave break off from loop
+            if (accept_failure_counter == 60 * 3)
+            {
+                break;
+            }
+            sleep(1);
+            accept_failure_counter++;
+            continue;
         }
+        accept_failure_counter = 0;
 
         if (server->keep_running == 0)
         {
@@ -262,12 +273,11 @@ void tcp_start_server(tcp_server *server)
         {
             /*
                 error number may be related to unable to create thread , or policy does not allow thread creation or invalid thread attributes (this cannot happen in our case)
-                we will stick to one thing : unable to create thread , we can retry , I choose to leave , break off
+
             */
+            close(client->socket_descriptor);
             free(client);
-            server->error_number = 905;
-            server->error_type = 'C';
-            break;
+            continue;
         }
     } // infinite loop to accept the connection
 
