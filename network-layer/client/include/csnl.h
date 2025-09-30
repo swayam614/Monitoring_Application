@@ -1,21 +1,11 @@
 #ifndef __CSNL__
 #define __CSNL__
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <errno.h>
-#include <string.h>
+#include <stdint.h>
 
 #define TCP_CONNECTION_CODE_ERROR_EXIT_CODE 55
-#define TCP_RW_BUFFER_SIZE 16384
-#define TCP_RW_HEADER_SIZE 4
-#define TCP_SEND_LIMIT 4294967295 - TCP_RW_HEADER_SIZE
 
-struct _tcp_connection; 
+struct _tcp_connection;
 typedef struct _tcp_connection tcp_connection;
 
 tcp_connection *tcp_connect(const char *, unsigned short int);

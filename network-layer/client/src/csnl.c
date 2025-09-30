@@ -1,4 +1,16 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#include <string.h>
 #include <csnl.h>
+
+#define TCP_RW_BUFFER_SIZE 16384
+#define TCP_RW_HEADER_SIZE 4
+#define TCP_SEND_LIMIT 4294967295 - TCP_RW_HEADER_SIZE
 
 typedef struct _tcp_connection
 {
