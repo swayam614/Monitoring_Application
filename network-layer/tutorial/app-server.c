@@ -1,3 +1,9 @@
+/**
+ * @example app-server.c
+ * @author Swayam Palrecha
+ * @brief An example that uses Server API to setup a server and accept client connections
+ */
+
 #include <ssnl.h>
 #include <stdio.h>
 #include <string.h>

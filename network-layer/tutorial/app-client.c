@@ -1,3 +1,9 @@
+/**
+ * @example app-client.c
+ * @author Swayam Palrecha
+ * @brief An example that uses Client API to send and receive data
+ */
+
 #include <csnl.h>
 #include <stdio.h>
 #include <string.h>

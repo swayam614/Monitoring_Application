@@ -1,3 +1,9 @@
+/**
+ * @example shutdown-server.c
+ * @author Swayam Palrecha
+ * @brief An example that uses Client API to send a shutdown request
+ */
+
 #include <csnl.h>
 #include <string.h>
 #include <stdio.h>
