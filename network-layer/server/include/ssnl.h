@@ -1,3 +1,9 @@
+/**
+ * @file ssnl.h
+ * The functions of this library encaspulates the server side system programming
+ * details of sending and receiving data over TCP Sockets.
+ *
+ */
 #ifndef __SSNL__
 #define __SSNL__
 
