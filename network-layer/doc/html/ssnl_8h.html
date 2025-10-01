@@ -98,58 +98,684 @@ $(function(){initNavTree('ssnl_8h.html','',''); });
 Macros</h2></td></tr>
 <tr class="memitem:a99c1aec43c5a24eced43d9258b278965" id="r_a99c1aec43c5a24eced43d9258b278965"><td class="memItemLeft" align="right" valign="top"><a id="a99c1aec43c5a24eced43d9258b278965" name="a99c1aec43c5a24eced43d9258b278965"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>TCP_SERVER_ERROR_EXIT_CODE</b>&#160;&#160;&#160;54</td></tr>
+<tr class="memdesc:a99c1aec43c5a24eced43d9258b278965"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exit code to use to end the application if a TCP operation fails. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:ac4e857afeb9144b25f133755ee5e7914" id="r_ac4e857afeb9144b25f133755ee5e7914"><td class="memItemLeft" align="right" valign="top"><a id="ac4e857afeb9144b25f133755ee5e7914" name="ac4e857afeb9144b25f133755ee5e7914"></a>
 typedef struct _tcp_server&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_server</b></td></tr>
+<tr class="memdesc:ac4e857afeb9144b25f133755ee5e7914"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias of data type that represents TCP server. <br /></td></tr>
 <tr class="memitem:a04097f9f5fbd1df466a7d62a8359c55c" id="r_a04097f9f5fbd1df466a7d62a8359c55c"><td class="memItemLeft" align="right" valign="top"><a id="a04097f9f5fbd1df466a7d62a8359c55c" name="a04097f9f5fbd1df466a7d62a8359c55c"></a>
 typedef struct _tcp_client&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client</b></td></tr>
+<tr class="memdesc:a04097f9f5fbd1df466a7d62a8359c55c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias of data type that represents connected TCP client. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:afaa9dd1d816fcc9003ea28955b296e35" id="r_afaa9dd1d816fcc9003ea28955b296e35"><td class="memItemLeft" align="right" valign="top"><a id="afaa9dd1d816fcc9003ea28955b296e35" name="afaa9dd1d816fcc9003ea28955b296e35"></a>
-tcp_server *&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_tcp_server</b> (unsigned short int)</td></tr>
-<tr class="memitem:afddd8dee7c0e76aadcedf3c7a59f5feb" id="r_afddd8dee7c0e76aadcedf3c7a59f5feb"><td class="memItemLeft" align="right" valign="top"><a id="afddd8dee7c0e76aadcedf3c7a59f5feb" name="afddd8dee7c0e76aadcedf3c7a59f5feb"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>release_tcp_server</b> (tcp_server *)</td></tr>
-<tr class="memitem:a15b40fd80e7ab7b1e5406e89716b88d8" id="r_a15b40fd80e7ab7b1e5406e89716b88d8"><td class="memItemLeft" align="right" valign="top"><a id="a15b40fd80e7ab7b1e5406e89716b88d8" name="a15b40fd80e7ab7b1e5406e89716b88d8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_start_server</b> (tcp_server *)</td></tr>
-<tr class="memitem:adc8ba3d914e93da4841ee3cadd08619f" id="r_adc8ba3d914e93da4841ee3cadd08619f"><td class="memItemLeft" align="right" valign="top"><a id="adc8ba3d914e93da4841ee3cadd08619f" name="adc8ba3d914e93da4841ee3cadd08619f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_stop_server</b> (tcp_server *)</td></tr>
-<tr class="memitem:ab7ebf6fc1616524cd120dfe0a220a1b7" id="r_ab7ebf6fc1616524cd120dfe0a220a1b7"><td class="memItemLeft" align="right" valign="top"><a id="ab7ebf6fc1616524cd120dfe0a220a1b7" name="ab7ebf6fc1616524cd120dfe0a220a1b7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>disconnect_tcp_client</b> (tcp_client *)</td></tr>
-<tr class="memitem:a669881a6b9e7903a4aa0ba72006f6d58" id="r_a669881a6b9e7903a4aa0ba72006f6d58"><td class="memItemLeft" align="right" valign="top"><a id="a669881a6b9e7903a4aa0ba72006f6d58" name="a669881a6b9e7903a4aa0ba72006f6d58"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>release_tcp_client</b> (tcp_client *)</td></tr>
-<tr class="memitem:ad04b5127c7822b541452e0f568cf8226" id="r_ad04b5127c7822b541452e0f568cf8226"><td class="memItemLeft" align="right" valign="top"><a id="ad04b5127c7822b541452e0f568cf8226" name="ad04b5127c7822b541452e0f568cf8226"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_send</b> (tcp_client *, const char *, uint32_t)</td></tr>
-<tr class="memitem:a6620e9126f0feadbd17d5a410efc96cb" id="r_a6620e9126f0feadbd17d5a410efc96cb"><td class="memItemLeft" align="right" valign="top"><a id="a6620e9126f0feadbd17d5a410efc96cb" name="a6620e9126f0feadbd17d5a410efc96cb"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_receive</b> (tcp_client *, uint32_t *)</td></tr>
-<tr class="memitem:a0dcdc13dc67f62680faf1ec512986f76" id="r_a0dcdc13dc67f62680faf1ec512986f76"><td class="memItemLeft" align="right" valign="top"><a id="a0dcdc13dc67f62680faf1ec512986f76" name="a0dcdc13dc67f62680faf1ec512986f76"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_get_local_ip</b> (tcp_client *)</td></tr>
-<tr class="memitem:a48b87b220656af3e1ed5ab50f3cee81a" id="r_a48b87b220656af3e1ed5ab50f3cee81a"><td class="memItemLeft" align="right" valign="top"><a id="a48b87b220656af3e1ed5ab50f3cee81a" name="a48b87b220656af3e1ed5ab50f3cee81a"></a>
-unsigned short int&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_get_local_port</b> (tcp_client *)</td></tr>
-<tr class="memitem:ae5b99175ba2d32376cf22475e3c4fe9a" id="r_ae5b99175ba2d32376cf22475e3c4fe9a"><td class="memItemLeft" align="right" valign="top"><a id="ae5b99175ba2d32376cf22475e3c4fe9a" name="ae5b99175ba2d32376cf22475e3c4fe9a"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_get_remote_ip</b> (tcp_client *)</td></tr>
-<tr class="memitem:a8bd672afade3c836a48607319c29a37c" id="r_a8bd672afade3c836a48607319c29a37c"><td class="memItemLeft" align="right" valign="top"><a id="a8bd672afade3c836a48607319c29a37c" name="a8bd672afade3c836a48607319c29a37c"></a>
-unsigned short int&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_get_remote_port</b> (tcp_client *)</td></tr>
-<tr class="memitem:a4217d9358e47255cb6bf2b49712ca132" id="r_a4217d9358e47255cb6bf2b49712ca132"><td class="memItemLeft" align="right" valign="top"><a id="a4217d9358e47255cb6bf2b49712ca132" name="a4217d9358e47255cb6bf2b49712ca132"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_server_failed</b> (tcp_server *)</td></tr>
-<tr class="memitem:a6b70cd782df78e7c161bd422aeae90c5" id="r_a6b70cd782df78e7c161bd422aeae90c5"><td class="memItemLeft" align="right" valign="top"><a id="a6b70cd782df78e7c161bd422aeae90c5" name="a6b70cd782df78e7c161bd422aeae90c5"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_server_error</b> (tcp_server *, char **)</td></tr>
-<tr class="memitem:acf1e0aa4613b7c235c148ef5422e8f50" id="r_acf1e0aa4613b7c235c148ef5422e8f50"><td class="memItemLeft" align="right" valign="top"><a id="acf1e0aa4613b7c235c148ef5422e8f50" name="acf1e0aa4613b7c235c148ef5422e8f50"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_failed</b> (tcp_client *)</td></tr>
-<tr class="memitem:a64167ebfb141b15b59b503187260a39f" id="r_a64167ebfb141b15b59b503187260a39f"><td class="memItemLeft" align="right" valign="top"><a id="a64167ebfb141b15b59b503187260a39f" name="a64167ebfb141b15b59b503187260a39f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tcp_client_error</b> (tcp_client *, char **)</td></tr>
-<tr class="memitem:a5e5cf1c9407816a7d5c3d6148aacb736" id="r_a5e5cf1c9407816a7d5c3d6148aacb736"><td class="memItemLeft" align="right" valign="top"><a id="a5e5cf1c9407816a7d5c3d6148aacb736" name="a5e5cf1c9407816a7d5c3d6148aacb736"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>on_tcp_server_started</b> (tcp_server *, void(*)(unsigned short int))</td></tr>
-<tr class="memitem:ae46106274d5633fa50dde18459cfe027" id="r_ae46106274d5633fa50dde18459cfe027"><td class="memItemLeft" align="right" valign="top"><a id="ae46106274d5633fa50dde18459cfe027" name="ae46106274d5633fa50dde18459cfe027"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>on_tcp_server_stoppped</b> (tcp_server *, void(*handler)(unsigned short int))</td></tr>
-<tr class="memitem:aa5d8264265c89824c259ade1199f5d67" id="r_aa5d8264265c89824c259ade1199f5d67"><td class="memItemLeft" align="right" valign="top"><a id="aa5d8264265c89824c259ade1199f5d67" name="aa5d8264265c89824c259ade1199f5d67"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>on_tcp_client_connected</b> (tcp_server *, void(*)(unsigned short int, tcp_server *, tcp_client *))</td></tr>
+<tr class="memitem:a76ac0893489f7d542169aba503756811" id="r_a76ac0893489f7d542169aba503756811"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a76ac0893489f7d542169aba503756811">allocate_tcp_server</a> (unsigned short int port)</td></tr>
+<tr class="memdesc:a76ac0893489f7d542169aba503756811"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates resources for TCP server.  <br /></td></tr>
+<tr class="memitem:aebd00543253196fb8567be9b42e27ab7" id="r_aebd00543253196fb8567be9b42e27ab7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aebd00543253196fb8567be9b42e27ab7">on_tcp_server_started</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server, void(*handler)(unsigned short int port))</td></tr>
+<tr class="memdesc:aebd00543253196fb8567be9b42e27ab7"><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the handler function that will be called when the server starts  <br /></td></tr>
+<tr class="memitem:aa1dc28677eaf03315cb528707234f48f" id="r_aa1dc28677eaf03315cb528707234f48f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1dc28677eaf03315cb528707234f48f">on_tcp_server_stoppped</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server, void(*handler)(unsigned short int))</td></tr>
+<tr class="memdesc:aa1dc28677eaf03315cb528707234f48f"><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the handler function that will be called when the server stops  <br /></td></tr>
+<tr class="memitem:a562cbeb2b865e0853fc5c2e4bcf9e76b" id="r_a562cbeb2b865e0853fc5c2e4bcf9e76b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a562cbeb2b865e0853fc5c2e4bcf9e76b">on_tcp_client_connected</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server, void(*handler)(unsigned short int, <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *, <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *))</td></tr>
+<tr class="memdesc:a562cbeb2b865e0853fc5c2e4bcf9e76b"><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the handler function that will be called whenever a client connects  <br /></td></tr>
+<tr class="memitem:a59c0a101cc3bcd243cdab87624882310" id="r_a59c0a101cc3bcd243cdab87624882310"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a59c0a101cc3bcd243cdab87624882310">tcp_start_server</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server)</td></tr>
+<tr class="memdesc:a59c0a101cc3bcd243cdab87624882310"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts the TCP server.  <br /></td></tr>
+<tr class="memitem:a62ca00a99e469c043af929f49ebfccd8" id="r_a62ca00a99e469c043af929f49ebfccd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62ca00a99e469c043af929f49ebfccd8">tcp_client_send</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client, const char *buffer, uint32_t len)</td></tr>
+<tr class="memdesc:a62ca00a99e469c043af929f49ebfccd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data via a connected TCP connection.  <br /></td></tr>
+<tr class="memitem:ab3ce7dab2b675efaf6ab01736163a24c" id="r_ab3ce7dab2b675efaf6ab01736163a24c"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3ce7dab2b675efaf6ab01736163a24c">tcp_client_receive</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client, uint32_t *len)</td></tr>
+<tr class="memdesc:ab3ce7dab2b675efaf6ab01736163a24c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive data via a connected TCP connection.  <br /></td></tr>
+<tr class="memitem:a3bacfc3bc815e346dcbf866415b0de36" id="r_a3bacfc3bc815e346dcbf866415b0de36"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bacfc3bc815e346dcbf866415b0de36">tcp_client_get_local_ip</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a3bacfc3bc815e346dcbf866415b0de36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get server IP of TCP connection through which the server has accepted the connection.  <br /></td></tr>
+<tr class="memitem:a86122cf41fe8f1071855c097e4dad41e" id="r_a86122cf41fe8f1071855c097e4dad41e"><td class="memItemLeft" align="right" valign="top">unsigned short int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86122cf41fe8f1071855c097e4dad41e">tcp_client_get_local_port</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a86122cf41fe8f1071855c097e4dad41e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get server port of TCP connection through which the server has accepted the connection.  <br /></td></tr>
+<tr class="memitem:a171a961cb4fdb16625698f94cae6abd3" id="r_a171a961cb4fdb16625698f94cae6abd3"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a171a961cb4fdb16625698f94cae6abd3">tcp_client_get_remote_ip</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a171a961cb4fdb16625698f94cae6abd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get client IP of TCP connection.  <br /></td></tr>
+<tr class="memitem:a30162a64b5c3a011b14fa565d6e7676a" id="r_a30162a64b5c3a011b14fa565d6e7676a"><td class="memItemLeft" align="right" valign="top">unsigned short int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a30162a64b5c3a011b14fa565d6e7676a">tcp_client_get_remote_port</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a30162a64b5c3a011b14fa565d6e7676a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get client port of TCP connection.  <br /></td></tr>
+<tr class="memitem:a16d955e00b6250e4b3dcc695c5a95484" id="r_a16d955e00b6250e4b3dcc695c5a95484"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a16d955e00b6250e4b3dcc695c5a95484">disconnect_tcp_client</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a16d955e00b6250e4b3dcc695c5a95484"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disconnect TCP connection with TCP client.  <br /></td></tr>
+<tr class="memitem:a6737d4a852388f56b0f7259aa7e7b070" id="r_a6737d4a852388f56b0f7259aa7e7b070"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6737d4a852388f56b0f7259aa7e7b070">release_tcp_client</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a6737d4a852388f56b0f7259aa7e7b070"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release resources associated with a TCP client.  <br /></td></tr>
+<tr class="memitem:a73540d37d0ca0532387fc384e057b85e" id="r_a73540d37d0ca0532387fc384e057b85e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client)</td></tr>
+<tr class="memdesc:a73540d37d0ca0532387fc384e057b85e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if an operation failed.  <br /></td></tr>
+<tr class="memitem:aeb33807d1d2af17928fe8fb1a1f18102" id="r_aeb33807d1d2af17928fe8fb1a1f18102"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a> (<a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *client, char **ptr)</td></tr>
+<tr class="memdesc:aeb33807d1d2af17928fe8fb1a1f18102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts error message.  <br /></td></tr>
+<tr class="memitem:ab3da1191c9def75eb6da1a250fc1cefb" id="r_ab3da1191c9def75eb6da1a250fc1cefb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3da1191c9def75eb6da1a250fc1cefb">tcp_stop_server</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server)</td></tr>
+<tr class="memdesc:ab3da1191c9def75eb6da1a250fc1cefb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop TCP server.  <br /></td></tr>
+<tr class="memitem:a61371d67b70df01d812e224418bc3cb9" id="r_a61371d67b70df01d812e224418bc3cb9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61371d67b70df01d812e224418bc3cb9">release_tcp_server</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server)</td></tr>
+<tr class="memdesc:a61371d67b70df01d812e224418bc3cb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases resources associated with TCP server.  <br /></td></tr>
+<tr class="memitem:a4dc590f405eafb1a62db835b875eda14" id="r_a4dc590f405eafb1a62db835b875eda14"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server)</td></tr>
+<tr class="memdesc:a4dc590f405eafb1a62db835b875eda14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if an operation failed.  <br /></td></tr>
+<tr class="memitem:a7c99e982d8ce14e0be0042ab6dcf3f05" id="r_a7c99e982d8ce14e0be0042ab6dcf3f05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> (<a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server, char **ptr)</td></tr>
+<tr class="memdesc:a7c99e982d8ce14e0be0042ab6dcf3f05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts error message.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The functions of this library encaspulates the server side system programming details of sending and receiving data over TCP Sockets. </p>
-</div></div><!-- contents -->
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a76ac0893489f7d542169aba503756811" name="a76ac0893489f7d542169aba503756811"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76ac0893489f7d542169aba503756811">&#9670;&#160;</a></span>allocate_tcp_server()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> * allocate_tcp_server </td>
+          <td>(</td>
+          <td class="paramtype">unsigned short int</td>          <td class="paramname"><span class="paramname"><em>port</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Allocates resources for TCP server. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">port</td><td>port number to associated with the TCP server </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns address of a structure that represents TCP server </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a13">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a16d955e00b6250e4b3dcc695c5a95484" name="a16d955e00b6250e4b3dcc695c5a95484"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16d955e00b6250e4b3dcc695c5a95484">&#9670;&#160;</a></span>disconnect_tcp_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void disconnect_tcp_client </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disconnect TCP connection with TCP client. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a9">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a562cbeb2b865e0853fc5c2e4bcf9e76b" name="a562cbeb2b865e0853fc5c2e4bcf9e76b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a562cbeb2b865e0853fc5c2e4bcf9e76b">&#9670;&#160;</a></span>on_tcp_client_connected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void on_tcp_client_connected </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*</td>          <td class="paramname"><span class="paramname"><em>handler&#160;</em></span>)(unsigned short int, <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *, <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *)&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>sets the handler function that will be called whenever a client connects </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">handler</td><td>address of the handler function that should get called whenever client connects </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>It is essential to set this event. If not set , then the function <a class="el" href="#a59c0a101cc3bcd243cdab87624882310">tcp_start_server</a> will fail </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a20">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="aebd00543253196fb8567be9b42e27ab7" name="aebd00543253196fb8567be9b42e27ab7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebd00543253196fb8567be9b42e27ab7">&#9670;&#160;</a></span>on_tcp_server_started()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void on_tcp_server_started </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*</td>          <td class="paramname"><span class="paramname"><em>handler&#160;</em></span>)(unsigned short int port)&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>sets the handler function that will be called when the server starts </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">handler</td><td>address of the handler function that should get called when server starts </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>It is not essential to setup this event </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a18">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="aa1dc28677eaf03315cb528707234f48f" name="aa1dc28677eaf03315cb528707234f48f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1dc28677eaf03315cb528707234f48f">&#9670;&#160;</a></span>on_tcp_server_stoppped()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void on_tcp_server_stoppped </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*</td>          <td class="paramname"><span class="paramname"><em>handler&#160;</em></span>)(unsigned short int)&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>sets the handler function that will be called when the server stops </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">handler</td><td>address of the handler function that should get called when server stops </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>It is not essential to setup this event </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a19">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a6737d4a852388f56b0f7259aa7e7b070" name="a6737d4a852388f56b0f7259aa7e7b070"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6737d4a852388f56b0f7259aa7e7b070">&#9670;&#160;</a></span>release_tcp_client()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void release_tcp_client </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Release resources associated with a TCP client. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a10">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a61371d67b70df01d812e224418bc3cb9" name="a61371d67b70df01d812e224418bc3cb9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61371d67b70df01d812e224418bc3cb9">&#9670;&#160;</a></span>release_tcp_server()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void release_tcp_server </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Releases resources associated with TCP server. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a15">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="aeb33807d1d2af17928fe8fb1a1f18102" name="aeb33807d1d2af17928fe8fb1a1f18102"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb33807d1d2af17928fe8fb1a1f18102">&#9670;&#160;</a></span>tcp_client_error()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tcp_client_error </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **</td>          <td class="paramname"><span class="paramname"><em>ptr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Extracts error message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">ptr</td><td>address of char * type pointer where the base address of the error string is to be kept </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section pre"><dt>Precondition</dt><dd>before calling <a class="el" href="#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a> , you should call <a class="el" href="#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a> to determine if an operation failed. If an operation has failed then error would exit </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>if error message exits , base address of the string with error message will be assigned to the pointer to which ptr is pointing to </dd>
+<dd>
+if error message does not exist or enough memeory to store error message is not available , NULL will be assigned to the pointer to which ptr is pointing to </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>when the error message is no more required , the memory should be released using the free function. The argument to the free function should be base address of the string that contains the error message. </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a4">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a73540d37d0ca0532387fc384e057b85e" name="a73540d37d0ca0532387fc384e057b85e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73540d37d0ca0532387fc384e057b85e">&#9670;&#160;</a></span>tcp_client_failed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tcp_client_failed </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if an operation failed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns int that represents true(non-zero) or false(zero) </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd>tcp_client_failed should be called after either of the function are called <a class="el" href="#a62ca00a99e469c043af929f49ebfccd8">tcp_client_send</a> , <a class="el" href="#ab3ce7dab2b675efaf6ab01736163a24c">tcp_client_receive</a> , <a class="el" href="#a3bacfc3bc815e346dcbf866415b0de36">tcp_client_get_local_ip</a> , <a class="el" href="#a86122cf41fe8f1071855c097e4dad41e">tcp_client_get_local_port</a> , <a class="el" href="#a171a961cb4fdb16625698f94cae6abd3">tcp_client_get_remote_ip</a> or <a class="el" href="#a30162a64b5c3a011b14fa565d6e7676a">tcp_client_get_remote_port</a> </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>The error message can be extracted using <a class="el" href="#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a3">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a3bacfc3bc815e346dcbf866415b0de36" name="a3bacfc3bc815e346dcbf866415b0de36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bacfc3bc815e346dcbf866415b0de36">&#9670;&#160;</a></span>tcp_client_get_local_ip()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * tcp_client_get_local_ip </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get server IP of TCP connection through which the server has accepted the connection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns base address of string that contains the server IP of TCP connection </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>When the server IP is more required then the memory should be released using free function. The argument to the free function should be the base address of the string that contains the server IP. </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a6">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a86122cf41fe8f1071855c097e4dad41e" name="a86122cf41fe8f1071855c097e4dad41e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86122cf41fe8f1071855c097e4dad41e">&#9670;&#160;</a></span>tcp_client_get_local_port()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned short int tcp_client_get_local_port </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get server port of TCP connection through which the server has accepted the connection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns server port of TCP connection </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a7">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a171a961cb4fdb16625698f94cae6abd3" name="a171a961cb4fdb16625698f94cae6abd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a171a961cb4fdb16625698f94cae6abd3">&#9670;&#160;</a></span>tcp_client_get_remote_ip()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * tcp_client_get_remote_ip </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get client IP of TCP connection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns base address of string that contains the client IP of TCP connection </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>When the client IP is more required then the memory should be released using free function. The argument to the free function should be the base address of the string that contains the client IP. </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a2">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a30162a64b5c3a011b14fa565d6e7676a" name="a30162a64b5c3a011b14fa565d6e7676a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30162a64b5c3a011b14fa565d6e7676a">&#9670;&#160;</a></span>tcp_client_get_remote_port()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned short int tcp_client_get_remote_port </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get client port of TCP connection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns client port of TCP connection </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a5">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="ab3ce7dab2b675efaf6ab01736163a24c" name="ab3ce7dab2b675efaf6ab01736163a24c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3ce7dab2b675efaf6ab01736163a24c">&#9670;&#160;</a></span>tcp_client_receive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * tcp_client_receive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Receive data via a connected TCP connection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">len</td><td>address of uint32_t type block where the length of data received is to be kept </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns base address of string that contains the data received via TCP connection , in case of failure , NULL is returned </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a8">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a62ca00a99e469c043af929f49ebfccd8" name="a62ca00a99e469c043af929f49ebfccd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62ca00a99e469c043af929f49ebfccd8">&#9670;&#160;</a></span>tcp_client_send()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tcp_client_send </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *</td>          <td class="paramname"><span class="paramname"><em>client</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>buffer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Send data via a connected TCP connection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">client</td><td>address of <a class="el" href="#a04097f9f5fbd1df466a7d62a8359c55c" title="Alias of data type that represents connected TCP client.">tcp_client</a> type structure </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">buffer</td><td>buffer address of string buffer that contains the string to be send to connected client </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">len</td><td>length of string buffer , cannot exceed 4294967295 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a12">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a7c99e982d8ce14e0be0042ab6dcf3f05" name="a7c99e982d8ce14e0be0042ab6dcf3f05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c99e982d8ce14e0be0042ab6dcf3f05">&#9670;&#160;</a></span>tcp_server_error()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tcp_server_error </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **</td>          <td class="paramname"><span class="paramname"><em>ptr</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Extracts error message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">ptr</td><td>address of char * type pointer where the base address of the error string is to be kept </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section pre"><dt>Precondition</dt><dd>before calling <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> , you should call <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> to determine if an operation failed. If an operation has failed then error would exit </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>if error message exits , base address of the string with error message will be assigned to the pointer to which ptr is pointing to </dd>
+<dd>
+if error message does not exist or enough memeory to store error message is not available , NULL will be assigned to the pointer to which ptr is pointing to </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>when the error message is no more required , the memory should be released using the free function. The argument to the free function should be base address of the string that contains the error message. </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a16">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a4dc590f405eafb1a62db835b875eda14" name="a4dc590f405eafb1a62db835b875eda14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4dc590f405eafb1a62db835b875eda14">&#9670;&#160;</a></span>tcp_server_failed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tcp_server_failed </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if an operation failed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>returns int that represents true(non-zero) or false(zero) </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd>tcp_server_failed should be called after either of the function are called <a class="el" href="#a76ac0893489f7d542169aba503756811">allocate_tcp_server</a>, or <a class="el" href="#a59c0a101cc3bcd243cdab87624882310">tcp_start_server</a> , </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a14">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="a59c0a101cc3bcd243cdab87624882310" name="a59c0a101cc3bcd243cdab87624882310"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59c0a101cc3bcd243cdab87624882310">&#9670;&#160;</a></span>tcp_start_server()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tcp_start_server </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Starts the TCP server. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section pre"><dt>Precondition</dt><dd>Setting up tcp_client_connected event through <a class="el" href="#a562cbeb2b865e0853fc5c2e4bcf9e76b">on_tcp_client_connected</a> function is essential </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>If the function fails , error message will be setup </dd>
+<dd>
+To check if the function failed or not , make use of <a class="el" href="#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a> function </dd>
+<dd>
+The error message can be extracted using <a class="el" href="#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a> function </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a21">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+<a id="ab3da1191c9def75eb6da1a250fc1cefb" name="ab3da1191c9def75eb6da1a250fc1cefb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3da1191c9def75eb6da1a250fc1cefb">&#9670;&#160;</a></span>tcp_stop_server()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tcp_stop_server </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *</td>          <td class="paramname"><span class="paramname"><em>server</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stop TCP server. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>address of <a class="el" href="#ac4e857afeb9144b25f133755ee5e7914" title="Alias of data type that represents TCP server.">tcp_server</a> type structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-server_8c-example.html#a11">app-server.c</a>.</dd>
+</dl>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

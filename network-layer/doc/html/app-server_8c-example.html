@@ -115,7 +115,7 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line">    printf(<span class="stringliteral">&quot;Server listening on port %u has stopped\n&quot;</span>, server_port);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> tcp_server_client_connected_handler(<span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <span class="keywordtype">int</span> server_port, tcp_server *server, tcp_client *connected_client)</div>
+<div class="line"><span class="keywordtype">void</span> tcp_server_client_connected_handler(<span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <span class="keywordtype">int</span> server_port, <a id="_a0" name="_a0"></a><a class="code hl_typedef" href="ssnl_8h.html#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server, <a id="_a1" name="_a1"></a><a class="code hl_typedef" href="ssnl_8h.html#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a> *connected_client)</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// code that will be executed whenever a connection is accepted</span></div>
 <div class="line">    <span class="keywordtype">char</span> *error_str;</div>
@@ -128,10 +128,10 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line"> </div>
 <div class="line">    printf(<span class="stringliteral">&quot;Server listening on port %u has accepted connection request\n&quot;</span>, server_port);</div>
 <div class="line"> </div>
-<div class="line">    remote_ip = tcp_client_get_remote_ip(connected_client);</div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_client_failed(connected_client))</div>
+<div class="line">    remote_ip = <a id="a2" name="a2"></a><a class="code hl_function" href="ssnl_8h.html#a171a961cb4fdb16625698f94cae6abd3">tcp_client_get_remote_ip</a>(connected_client);</div>
+<div class="line">    <span class="keywordflow">if</span> (<a id="a3" name="a3"></a><a class="code hl_function" href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a>(connected_client))</div>
 <div class="line">    {</div>
-<div class="line">        tcp_client_error(connected_client, &amp;error_str);</div>
+<div class="line">        <a id="a4" name="a4"></a><a class="code hl_function" href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a>(connected_client, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
@@ -144,10 +144,10 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line">        free(remote_ip);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    remote_port = tcp_client_get_remote_port(connected_client);</div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_client_failed(connected_client))</div>
+<div class="line">    remote_port = <a id="a5" name="a5"></a><a class="code hl_function" href="ssnl_8h.html#a30162a64b5c3a011b14fa565d6e7676a">tcp_client_get_remote_port</a>(connected_client);</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a>(connected_client))</div>
 <div class="line">    {</div>
-<div class="line">        tcp_client_error(connected_client, &amp;error_str);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a>(connected_client, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
@@ -159,10 +159,10 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line">        printf(<span class="stringliteral">&quot;Remote PORT number : %u\n&quot;</span>, remote_port);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    local_ip = tcp_client_get_local_ip(connected_client);</div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_client_failed(connected_client))</div>
+<div class="line">    local_ip = <a id="a6" name="a6"></a><a class="code hl_function" href="ssnl_8h.html#a3bacfc3bc815e346dcbf866415b0de36">tcp_client_get_local_ip</a>(connected_client);</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a>(connected_client))</div>
 <div class="line">    {</div>
-<div class="line">        tcp_client_error(connected_client, &amp;error_str);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a>(connected_client, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
@@ -175,10 +175,10 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line">        free(local_ip);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    local_port = tcp_client_get_local_port(connected_client);</div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_client_failed(connected_client))</div>
+<div class="line">    local_port = <a id="a7" name="a7"></a><a class="code hl_function" href="ssnl_8h.html#a86122cf41fe8f1071855c097e4dad41e">tcp_client_get_local_port</a>(connected_client);</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a>(connected_client))</div>
 <div class="line">    {</div>
-<div class="line">        tcp_client_error(connected_client, &amp;error_str);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a>(connected_client, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
@@ -192,17 +192,17 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line"> </div>
 <div class="line">    <span class="comment">// code to receive request data starts here</span></div>
 <div class="line"> </div>
-<div class="line">    request = tcp_client_receive(connected_client, &amp;request_size);</div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_client_failed(connected_client))</div>
+<div class="line">    request = <a id="a8" name="a8"></a><a class="code hl_function" href="ssnl_8h.html#ab3ce7dab2b675efaf6ab01736163a24c">tcp_client_receive</a>(connected_client, &amp;request_size);</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a>(connected_client))</div>
 <div class="line">    {</div>
-<div class="line">        tcp_client_error(connected_client, &amp;error_str);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a>(connected_client, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
 <div class="line">            free(error_str);</div>
 <div class="line">        }</div>
-<div class="line">        disconnect_tcp_client(connected_client);</div>
-<div class="line">        release_tcp_client(connected_client);</div>
+<div class="line">        <a id="a9" name="a9"></a><a class="code hl_function" href="ssnl_8h.html#a16d955e00b6250e4b3dcc695c5a95484">disconnect_tcp_client</a>(connected_client);</div>
+<div class="line">        <a id="a10" name="a10"></a><a class="code hl_function" href="ssnl_8h.html#a6737d4a852388f56b0f7259aa7e7b070">release_tcp_client</a>(connected_client);</div>
 <div class="line">        <span class="keywordflow">return</span>;</div>
 <div class="line">    }</div>
 <div class="line"> </div>
@@ -217,9 +217,9 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">if</span> (strncmp(request, <span class="stringliteral">&quot;shutdown-server&quot;</span>, request_size) == 0)</div>
 <div class="line">    {</div>
-<div class="line">        tcp_stop_server(server);</div>
-<div class="line">        disconnect_tcp_client(connected_client);</div>
-<div class="line">        release_tcp_client(connected_client);</div>
+<div class="line">        <a id="a11" name="a11"></a><a class="code hl_function" href="ssnl_8h.html#ab3da1191c9def75eb6da1a250fc1cefb">tcp_stop_server</a>(server);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a16d955e00b6250e4b3dcc695c5a95484">disconnect_tcp_client</a>(connected_client);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a6737d4a852388f56b0f7259aa7e7b070">release_tcp_client</a>(connected_client);</div>
 <div class="line">        free(request);</div>
 <div class="line">        <span class="keywordflow">return</span>;</div>
 <div class="line">    }</div>
@@ -264,17 +264,17 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line">    strcat(data, <span class="stringliteral">&quot;26. We also deal in computers and printers. You can call us any time for product\n&quot;</span>);</div>
 <div class="line">    strcat(data, <span class="stringliteral">&quot;27. enquiry. Our Sales person will be happy to help you whenever required\n&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">    tcp_client_send(connected_client, data, strlen(data));</div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_client_failed(connected_client))</div>
+<div class="line">    <a id="a12" name="a12"></a><a class="code hl_function" href="ssnl_8h.html#a62ca00a99e469c043af929f49ebfccd8">tcp_client_send</a>(connected_client, data, strlen(data));</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a>(connected_client))</div>
 <div class="line">    {</div>
-<div class="line">        tcp_client_error(connected_client, &amp;error_str);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a>(connected_client, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
 <div class="line">            free(error_str);</div>
 <div class="line">        }</div>
-<div class="line">        disconnect_tcp_client(connected_client);</div>
-<div class="line">        release_tcp_client(connected_client);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a16d955e00b6250e4b3dcc695c5a95484">disconnect_tcp_client</a>(connected_client);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a6737d4a852388f56b0f7259aa7e7b070">release_tcp_client</a>(connected_client);</div>
 <div class="line">        <span class="keywordflow">return</span>;</div>
 <div class="line">    }</div>
 <div class="line"> </div>
@@ -284,33 +284,33 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line"><span class="keywordtype">int</span> main()</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordtype">char</span> *error_str;</div>
-<div class="line">    tcp_server *server;</div>
-<div class="line">    server = allocate_tcp_server(5046); <span class="comment">// Bobby may write code to pick port number from some file</span></div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_server_failed(server))</div>
+<div class="line">    <a class="code hl_typedef" href="ssnl_8h.html#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a> *server;</div>
+<div class="line">    server = <a id="a13" name="a13"></a><a class="code hl_function" href="ssnl_8h.html#a76ac0893489f7d542169aba503756811">allocate_tcp_server</a>(5046); <span class="comment">// Bobby may write code to pick port number from some file</span></div>
+<div class="line">    <span class="keywordflow">if</span> (<a id="a14" name="a14"></a><a class="code hl_function" href="ssnl_8h.html#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a>(server))</div>
 <div class="line">    {</div>
-<div class="line">        release_tcp_server(server);</div>
-<div class="line">        tcp_server_error(server, &amp;error_str);</div>
+<div class="line">        <a id="a15" name="a15"></a><a class="code hl_function" href="ssnl_8h.html#a61371d67b70df01d812e224418bc3cb9">release_tcp_server</a>(server);</div>
+<div class="line">        <a id="a16" name="a16"></a><a class="code hl_function" href="ssnl_8h.html#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a>(server, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
 <div class="line">            free(error_str);</div>
 <div class="line">        }</div>
-<div class="line">        exit(TCP_SERVER_ERROR_EXIT_CODE); <span class="comment">// application terminates with an error code (non zero)</span></div>
+<div class="line">        exit(<a id="_a17" name="_a17"></a><a class="code hl_define" href="ssnl_8h.html#a99c1aec43c5a24eced43d9258b278965">TCP_SERVER_ERROR_EXIT_CODE</a>); <span class="comment">// application terminates with an error code (non zero)</span></div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// server allocated to accept request on 5046, not yet accepting connection</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// setting up some handlers</span></div>
-<div class="line">    on_tcp_server_started(server, tcp_server_started_handler);</div>
-<div class="line">    on_tcp_server_stoppped(server, tcp_server_stoppped_handler);</div>
-<div class="line">    on_tcp_client_connected(server, tcp_server_client_connected_handler);</div>
+<div class="line">    <a id="a18" name="a18"></a><a class="code hl_function" href="ssnl_8h.html#aebd00543253196fb8567be9b42e27ab7">on_tcp_server_started</a>(server, tcp_server_started_handler);</div>
+<div class="line">    <a id="a19" name="a19"></a><a class="code hl_function" href="ssnl_8h.html#aa1dc28677eaf03315cb528707234f48f">on_tcp_server_stoppped</a>(server, tcp_server_stoppped_handler);</div>
+<div class="line">    <a id="a20" name="a20"></a><a class="code hl_function" href="ssnl_8h.html#a562cbeb2b865e0853fc5c2e4bcf9e76b">on_tcp_client_connected</a>(server, tcp_server_client_connected_handler);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// starting the server</span></div>
-<div class="line">    tcp_start_server(server); <span class="comment">// now the server is in waiting mode to accept the connection</span></div>
-<div class="line">    <span class="keywordflow">if</span> (tcp_server_failed(server))</div>
+<div class="line">    <a id="a21" name="a21"></a><a class="code hl_function" href="ssnl_8h.html#a59c0a101cc3bcd243cdab87624882310">tcp_start_server</a>(server); <span class="comment">// now the server is in waiting mode to accept the connection</span></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="ssnl_8h.html#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a>(server))</div>
 <div class="line">    {</div>
-<div class="line">        release_tcp_server(server);</div>
-<div class="line">        tcp_server_error(server, &amp;error_str);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a61371d67b70df01d812e224418bc3cb9">release_tcp_server</a>(server);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a>(server, &amp;error_str);</div>
 <div class="line">        <span class="keywordflow">if</span> (error_str != NULL)</div>
 <div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;%s\n&quot;</span>, error_str);</div>
@@ -320,11 +320,33 @@ $(function(){initNavTree('app-server_8c-example.html','',''); });
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">else</span></div>
 <div class="line">    {</div>
-<div class="line">        release_tcp_server(server);</div>
+<div class="line">        <a class="code hl_function" href="ssnl_8h.html#a61371d67b70df01d812e224418bc3cb9">release_tcp_server</a>(server);</div>
 <div class="line">    }</div>
 <div class="line">    pthread_exit(NULL); <span class="comment">// so that running thread wont terminate</span></div>
 <div class="line">}</div>
 <div class="ttc" id="assnl_8h_html"><div class="ttname"><a href="ssnl_8h.html">ssnl.h</a></div></div>
+<div class="ttc" id="assnl_8h_html_a04097f9f5fbd1df466a7d62a8359c55c"><div class="ttname"><a href="ssnl_8h.html#a04097f9f5fbd1df466a7d62a8359c55c">tcp_client</a></div><div class="ttdeci">struct _tcp_client tcp_client</div><div class="ttdoc">Alias of data type that represents connected TCP client.</div><div class="ttdef"><b>Definition</b> ssnl.h:35</div></div>
+<div class="ttc" id="assnl_8h_html_a16d955e00b6250e4b3dcc695c5a95484"><div class="ttname"><a href="ssnl_8h.html#a16d955e00b6250e4b3dcc695c5a95484">disconnect_tcp_client</a></div><div class="ttdeci">void disconnect_tcp_client(tcp_client *client)</div><div class="ttdoc">Disconnect TCP connection with TCP client.</div></div>
+<div class="ttc" id="assnl_8h_html_a171a961cb4fdb16625698f94cae6abd3"><div class="ttname"><a href="ssnl_8h.html#a171a961cb4fdb16625698f94cae6abd3">tcp_client_get_remote_ip</a></div><div class="ttdeci">char * tcp_client_get_remote_ip(tcp_client *client)</div><div class="ttdoc">Get client IP of TCP connection.</div></div>
+<div class="ttc" id="assnl_8h_html_a30162a64b5c3a011b14fa565d6e7676a"><div class="ttname"><a href="ssnl_8h.html#a30162a64b5c3a011b14fa565d6e7676a">tcp_client_get_remote_port</a></div><div class="ttdeci">unsigned short int tcp_client_get_remote_port(tcp_client *client)</div><div class="ttdoc">Get client port of TCP connection.</div></div>
+<div class="ttc" id="assnl_8h_html_a3bacfc3bc815e346dcbf866415b0de36"><div class="ttname"><a href="ssnl_8h.html#a3bacfc3bc815e346dcbf866415b0de36">tcp_client_get_local_ip</a></div><div class="ttdeci">char * tcp_client_get_local_ip(tcp_client *client)</div><div class="ttdoc">Get server IP of TCP connection through which the server has accepted the connection.</div></div>
+<div class="ttc" id="assnl_8h_html_a4dc590f405eafb1a62db835b875eda14"><div class="ttname"><a href="ssnl_8h.html#a4dc590f405eafb1a62db835b875eda14">tcp_server_failed</a></div><div class="ttdeci">int tcp_server_failed(tcp_server *server)</div><div class="ttdoc">Checks if an operation failed.</div></div>
+<div class="ttc" id="assnl_8h_html_a562cbeb2b865e0853fc5c2e4bcf9e76b"><div class="ttname"><a href="ssnl_8h.html#a562cbeb2b865e0853fc5c2e4bcf9e76b">on_tcp_client_connected</a></div><div class="ttdeci">void on_tcp_client_connected(tcp_server *server, void(*handler)(unsigned short int, tcp_server *, tcp_client *))</div><div class="ttdoc">sets the handler function that will be called whenever a client connects</div></div>
+<div class="ttc" id="assnl_8h_html_a59c0a101cc3bcd243cdab87624882310"><div class="ttname"><a href="ssnl_8h.html#a59c0a101cc3bcd243cdab87624882310">tcp_start_server</a></div><div class="ttdeci">void tcp_start_server(tcp_server *server)</div><div class="ttdoc">Starts the TCP server.</div></div>
+<div class="ttc" id="assnl_8h_html_a61371d67b70df01d812e224418bc3cb9"><div class="ttname"><a href="ssnl_8h.html#a61371d67b70df01d812e224418bc3cb9">release_tcp_server</a></div><div class="ttdeci">void release_tcp_server(tcp_server *server)</div><div class="ttdoc">Releases resources associated with TCP server.</div></div>
+<div class="ttc" id="assnl_8h_html_a62ca00a99e469c043af929f49ebfccd8"><div class="ttname"><a href="ssnl_8h.html#a62ca00a99e469c043af929f49ebfccd8">tcp_client_send</a></div><div class="ttdeci">void tcp_client_send(tcp_client *client, const char *buffer, uint32_t len)</div><div class="ttdoc">Send data via a connected TCP connection.</div></div>
+<div class="ttc" id="assnl_8h_html_a6737d4a852388f56b0f7259aa7e7b070"><div class="ttname"><a href="ssnl_8h.html#a6737d4a852388f56b0f7259aa7e7b070">release_tcp_client</a></div><div class="ttdeci">void release_tcp_client(tcp_client *client)</div><div class="ttdoc">Release resources associated with a TCP client.</div></div>
+<div class="ttc" id="assnl_8h_html_a73540d37d0ca0532387fc384e057b85e"><div class="ttname"><a href="ssnl_8h.html#a73540d37d0ca0532387fc384e057b85e">tcp_client_failed</a></div><div class="ttdeci">int tcp_client_failed(tcp_client *client)</div><div class="ttdoc">Checks if an operation failed.</div></div>
+<div class="ttc" id="assnl_8h_html_a76ac0893489f7d542169aba503756811"><div class="ttname"><a href="ssnl_8h.html#a76ac0893489f7d542169aba503756811">allocate_tcp_server</a></div><div class="ttdeci">tcp_server * allocate_tcp_server(unsigned short int port)</div><div class="ttdoc">Allocates resources for TCP server.</div></div>
+<div class="ttc" id="assnl_8h_html_a7c99e982d8ce14e0be0042ab6dcf3f05"><div class="ttname"><a href="ssnl_8h.html#a7c99e982d8ce14e0be0042ab6dcf3f05">tcp_server_error</a></div><div class="ttdeci">void tcp_server_error(tcp_server *server, char **ptr)</div><div class="ttdoc">Extracts error message.</div></div>
+<div class="ttc" id="assnl_8h_html_a86122cf41fe8f1071855c097e4dad41e"><div class="ttname"><a href="ssnl_8h.html#a86122cf41fe8f1071855c097e4dad41e">tcp_client_get_local_port</a></div><div class="ttdeci">unsigned short int tcp_client_get_local_port(tcp_client *client)</div><div class="ttdoc">Get server port of TCP connection through which the server has accepted the connection.</div></div>
+<div class="ttc" id="assnl_8h_html_a99c1aec43c5a24eced43d9258b278965"><div class="ttname"><a href="ssnl_8h.html#a99c1aec43c5a24eced43d9258b278965">TCP_SERVER_ERROR_EXIT_CODE</a></div><div class="ttdeci">#define TCP_SERVER_ERROR_EXIT_CODE</div><div class="ttdoc">Exit code to use to end the application if a TCP operation fails.</div><div class="ttdef"><b>Definition</b> ssnl.h:15</div></div>
+<div class="ttc" id="assnl_8h_html_aa1dc28677eaf03315cb528707234f48f"><div class="ttname"><a href="ssnl_8h.html#aa1dc28677eaf03315cb528707234f48f">on_tcp_server_stoppped</a></div><div class="ttdeci">void on_tcp_server_stoppped(tcp_server *server, void(*handler)(unsigned short int))</div><div class="ttdoc">sets the handler function that will be called when the server stops</div></div>
+<div class="ttc" id="assnl_8h_html_ab3ce7dab2b675efaf6ab01736163a24c"><div class="ttname"><a href="ssnl_8h.html#ab3ce7dab2b675efaf6ab01736163a24c">tcp_client_receive</a></div><div class="ttdeci">char * tcp_client_receive(tcp_client *client, uint32_t *len)</div><div class="ttdoc">Receive data via a connected TCP connection.</div></div>
+<div class="ttc" id="assnl_8h_html_ab3da1191c9def75eb6da1a250fc1cefb"><div class="ttname"><a href="ssnl_8h.html#ab3da1191c9def75eb6da1a250fc1cefb">tcp_stop_server</a></div><div class="ttdeci">void tcp_stop_server(tcp_server *server)</div><div class="ttdoc">Stop TCP server.</div></div>
+<div class="ttc" id="assnl_8h_html_ac4e857afeb9144b25f133755ee5e7914"><div class="ttname"><a href="ssnl_8h.html#ac4e857afeb9144b25f133755ee5e7914">tcp_server</a></div><div class="ttdeci">struct _tcp_server tcp_server</div><div class="ttdoc">Alias of data type that represents TCP server.</div><div class="ttdef"><b>Definition</b> ssnl.h:30</div></div>
+<div class="ttc" id="assnl_8h_html_aeb33807d1d2af17928fe8fb1a1f18102"><div class="ttname"><a href="ssnl_8h.html#aeb33807d1d2af17928fe8fb1a1f18102">tcp_client_error</a></div><div class="ttdeci">void tcp_client_error(tcp_client *client, char **ptr)</div><div class="ttdoc">Extracts error message.</div></div>
+<div class="ttc" id="assnl_8h_html_aebd00543253196fb8567be9b42e27ab7"><div class="ttname"><a href="ssnl_8h.html#aebd00543253196fb8567be9b42e27ab7">on_tcp_server_started</a></div><div class="ttdeci">void on_tcp_server_started(tcp_server *server, void(*handler)(unsigned short int port))</div><div class="ttdoc">sets the handler function that will be called when the server starts</div></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

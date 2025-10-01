@@ -285,7 +285,7 @@ if error message does not exist or enough memeory to store error message is not 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>int that represents true(non-zero) or false(zero) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>returns int that represents true(non-zero) or false(zero) </dd></dl>
 <dl class="section pre"><dt>Precondition</dt><dd>tcp_connection_failed should be called after either of the function are called <a class="el" href="#a3e788b874aea18c311ce8031aae92ff5">tcp_connect</a> , <a class="el" href="#ae1f4d135a4967e129dc41ff623ff3321">tcp_connection_send</a> , <a class="el" href="#a48cfc8aa2f76968cdb62beb58883bd7d">tcp_connection_receive</a> , <a class="el" href="#a60a39a5c53d3ed0edbb4444de74b4ae4">tcp_connection_get_local_ip</a> , <a class="el" href="#a177bf3b500f37d3afc3f8386a284f9be">tcp_connection_get_local_port</a> , <a class="el" href="#a350f2e27b60c6f9c1d646f2fcdaab250">tcp_connection_get_remote_ip</a> or <a class="el" href="#a0fc5e46ada95373bce3aefaecd567d8b">tcp_connection_get_remote_port</a> </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>The error message can be extracted using <a class="el" href="#acadf2efc7c36a8db5a44df06198cc25c">tcp_connection_error</a> function </dd></dl>
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="app-client_8c-example.html#a2">app-client.c</a>, and <a class="el" href="shutdown-server_8c-example.html#a2">shutdown-server.c</a>.</dd>
@@ -315,7 +315,7 @@ if error message does not exist or enough memeory to store error message is not 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>base address of a string that contains the client IP of TCP connection </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>returns base address of a string that contains the client IP of TCP connection </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>if the function fails , error message will be setup </dd>
 <dd>
 To check if the function failed or not , make use of <a class="el" href="#a7be3d3bf6b31c53b9836d1beb67f117e">tcp_connection_failed</a> function </dd>
@@ -349,7 +349,7 @@ The error message can be extracted using <a class="el" href="#acadf2efc7c36a8db5
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>client port of TCP connection </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>returns client port of TCP connection </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>if the function fails , error message will be setup </dd>
 <dd>
 To check if the function failed or not , make use of <a class="el" href="#a7be3d3bf6b31c53b9836d1beb67f117e">tcp_connection_failed</a> function </dd>
@@ -382,7 +382,7 @@ The error message can be extracted using <a class="el" href="#acadf2efc7c36a8db5
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>base address of a string that contains the server IP of TCP connection </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>returns base address of a string that contains the server IP of TCP connection </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>if the function fails , error message will be setup </dd>
 <dd>
 To check if the function failed or not , make use of <a class="el" href="#a7be3d3bf6b31c53b9836d1beb67f117e">tcp_connection_failed</a> function </dd>
@@ -416,7 +416,7 @@ The error message can be extracted using <a class="el" href="#acadf2efc7c36a8db5
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>server port of TCP connection </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>returns server port of TCP connection </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>if the function fails , error message will be setup </dd>
 <dd>
 To check if the function failed or not , make use of <a class="el" href="#a7be3d3bf6b31c53b9836d1beb67f117e">tcp_connection_failed</a> function </dd>
@@ -454,7 +454,7 @@ The error message can be extracted using <a class="el" href="#acadf2efc7c36a8db5
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>base address of a string that contains the data received via TCP connection , in case of failure NULL will be returned </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>returns base address of a string that contains the data received via TCP connection , in case of failure NULL will be returned </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>if the function fails , error message will be setup </dd>
 <dd>
 To check if the function failed or not , make use of <a class="el" href="#a7be3d3bf6b31c53b9836d1beb67f117e">tcp_connection_failed</a> function </dd>

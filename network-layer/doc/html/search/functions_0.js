@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['disconnect_5ftcp_5fconnection_0',['disconnect_tcp_connection',['../csnl_8h.html#a37e6275986bbf28879076c4272204325',1,'csnl.h']]]
+  ['allocate_5ftcp_5fserver_0',['allocate_tcp_server',['../ssnl_8h.html#a76ac0893489f7d542169aba503756811',1,'ssnl.h']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['csnl_2eh_0',['csnl.h',['../csnl_8h.html',1,'']]]
+  ['allocate_5ftcp_5fserver_0',['allocate_tcp_server',['../ssnl_8h.html#a76ac0893489f7d542169aba503756811',1,'ssnl.h']]]
 ];
