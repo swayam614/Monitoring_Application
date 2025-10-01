@@ -52,7 +52,7 @@ void tcp_connection_send(tcp_connection *connection, const char *buffer, uint32_
  * @brief Receive data via a TCP connection
  * @param[in] connection address of tcp_connection type structure
  * @param[out] len address of uint32_t type block where the length of data received is to be kept
- * @return base address of a string that contains the data received via TCP connection , in case of failure NULL will be returned
+ * @return returns base address of a string that contains the data received via TCP connection , in case of failure NULL will be returned
  * @post if the function fails , error message will be setup
  * @post To check if the function failed or not , make use of \ref tcp_connection_failed function
  * @post The error message can be extracted using \ref tcp_connection_error function
@@ -63,7 +63,7 @@ char *tcp_connection_receive(tcp_connection *connection, uint32_t *len);
 /**
  * @brief Get client IP of TCP connection
  * @param[in] connection address of tcp_connection type structure
- * @return base address of a string that contains the client IP of TCP connection
+ * @return returns base address of a string that contains the client IP of TCP connection
  * @post if the function fails , error message will be setup
  * @post To check if the function failed or not , make use of \ref tcp_connection_failed function
  * @post The error message can be extracted using \ref tcp_connection_error function
@@ -74,7 +74,7 @@ char *tcp_connection_get_local_ip(tcp_connection *connection);
 /**
  * @brief Get client port of TCP connection
  * @param[in] connection address of tcp_connection type structure
- * @return client port of TCP connection
+ * @return returns client port of TCP connection
  * @post if the function fails , error message will be setup
  * @post To check if the function failed or not , make use of \ref tcp_connection_failed function
  * @post The error message can be extracted using \ref tcp_connection_error function
@@ -84,7 +84,7 @@ unsigned short int tcp_connection_get_local_port(tcp_connection *connection);
 /**
  * @brief Get server IP of TCP connection
  * @param[in] connection address of tcp_connection type structure
- * @return base address of a string that contains the server IP of TCP connection
+ * @return returns base address of a string that contains the server IP of TCP connection
  * @post if the function fails , error message will be setup
  * @post To check if the function failed or not , make use of \ref tcp_connection_failed function
  * @post The error message can be extracted using \ref tcp_connection_error function
@@ -95,7 +95,7 @@ char *tcp_connection_get_remote_ip(tcp_connection *connection);
 /**
  * @brief Get server port of TCP connection
  * @param[in] connection address of tcp_connection type structure
- * @return server port of TCP connection
+ * @return returns server port of TCP connection
  * @post if the function fails , error message will be setup
  * @post To check if the function failed or not , make use of \ref  tcp_connection_failed function
  * @post The error message can be extracted using \ref tcp_connection_error function
@@ -117,7 +117,7 @@ void release_tcp_connection(tcp_connection *connection);
 /**
  * @brief Checks if an operation failed
  * @param[in] connection address of tcp_connection type structure
- * @return int that represents true(non-zero) or false(zero)
+ * @return returns int that represents true(non-zero) or false(zero)
  * @pre tcp_connection_failed should be called after either of the function are called
  * \ref tcp_connect ,
  * \ref tcp_connection_send ,
