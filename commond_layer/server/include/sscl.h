@@ -40,6 +40,9 @@ uint8_t tcp_action_request_get_uint8(tcp_action_request *request, const char *na
 uint16_t tcp_action_request_get_uint16(tcp_action_request *request, const char *name);
 uint32_t tcp_action_request_get_uint32(tcp_action_request *request, const char *name);
 uint64_t tcp_action_request_get_uint64(tcp_action_request *request, const char *name);
+float tcp_action_request_get_float(tcp_action_request *request, const char *name);
+double tcp_action_request_get_double(tcp_action_request *request, const char *name);
+long double tcp_action_request_get_long_double(tcp_action_request *request, const char *name);
 
 void tcp_action_response_set_string(tcp_action_response *response, const char *name, const char *value);
 void tcp_action_response_set_char(tcp_action_response *response, const char *name, char value);
@@ -51,6 +54,9 @@ void tcp_action_response_set_uint8(tcp_action_response *response, const char *na
 void tcp_action_response_set_uint16(tcp_action_response *response, const char *name, uint16_t value);
 void tcp_action_response_set_uint32(tcp_action_response *response, const char *name, uint32_t value);
 void tcp_action_response_set_uint64(tcp_action_response *response, const char *name, uint64_t value);
+void tcp_action_response_set_float(tcp_action_response *response, const char *name, float value);
+void tcp_action_response_set_double(tcp_action_response *response, const char *name, double value);
+void tcp_action_response_set_long_double(tcp_action_response *response, const char *name, long double value);
 
 void send_tcp_action_response(tcp_action_response *response);
 
