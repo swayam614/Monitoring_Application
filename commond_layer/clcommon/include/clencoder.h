@@ -12,6 +12,8 @@ byte_stream *create_byte_stream();
 
 char *get_byte_stream(byte_stream *stream);
 
+uint32_t get_byte_stream_length(byte_stream *stream);
+
 void release_byte_stream(byte_stream *stream);
 
 int add_char_to_byte_stream(byte_stream *stream, const char *name, char value);
