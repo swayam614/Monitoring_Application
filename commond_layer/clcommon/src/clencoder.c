@@ -21,7 +21,7 @@
 typedef struct _byte_stream
 {
     char *buffer;
-    uint8_t len;
+    uint32_t len;
 } byte_stream;
 
 int is_big_endian()
@@ -84,7 +84,7 @@ void release_byte_stream(byte_stream *stream)
 int add_char_to_byte_stream(byte_stream *stream, const char *name, char value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -119,7 +119,7 @@ int add_string_to_byte_stream(byte_stream *stream, const char *name, const char 
 {
     uint32_t name_len;
     uint32_t value_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t norder_value_len;
@@ -160,7 +160,7 @@ int add_string_to_byte_stream(byte_stream *stream, const char *name, const char 
 int add_int8_to_byte_stream(byte_stream *stream, const char *name, int8_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -194,7 +194,7 @@ int add_int8_to_byte_stream(byte_stream *stream, const char *name, int8_t value)
 int add_int16_to_byte_stream(byte_stream *stream, const char *name, int16_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -230,7 +230,7 @@ int add_int16_to_byte_stream(byte_stream *stream, const char *name, int16_t valu
 int add_int32_to_byte_stream(byte_stream *stream, const char *name, int32_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -266,7 +266,7 @@ int add_int32_to_byte_stream(byte_stream *stream, const char *name, int32_t valu
 int add_int64_to_byte_stream(byte_stream *stream, const char *name, int64_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -302,7 +302,7 @@ int add_int64_to_byte_stream(byte_stream *stream, const char *name, int64_t valu
 int add_uint8_to_byte_stream(byte_stream *stream, const char *name, uint8_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -336,7 +336,7 @@ int add_uint8_to_byte_stream(byte_stream *stream, const char *name, uint8_t valu
 int add_uint16_to_byte_stream(byte_stream *stream, const char *name, uint16_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -372,7 +372,7 @@ int add_uint16_to_byte_stream(byte_stream *stream, const char *name, uint16_t va
 int add_uint32_to_byte_stream(byte_stream *stream, const char *name, uint32_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -408,7 +408,7 @@ int add_uint32_to_byte_stream(byte_stream *stream, const char *name, uint32_t va
 int add_uint64_to_byte_stream(byte_stream *stream, const char *name, uint64_t value)
 {
     uint32_t name_len;
-    int i;
+    uint32_t i;
     uint32_t required_len;
     uint32_t norder_name_len;
     uint32_t name_index;
@@ -443,14 +443,137 @@ int add_uint64_to_byte_stream(byte_stream *stream, const char *name, uint64_t va
 
 int add_float_to_byte_stream(byte_stream *stream, const char *name, float value)
 {
+    uint32_t name_len;
+    uint32_t value_len;
+    uint32_t i;
+    uint32_t required_len;
+    uint32_t norder_name_len;
+    uint32_t norder_value_len;
+    uint32_t name_index;
+    uint32_t value_index;
+    uint32_t value_len_index;
+    char *ptr;
+    char fstr[2001];
+
+    if (stream == NULL || name == NULL)
+        return 0; // 0 for false
+    i = stream->len;
+    name_len = strlen(name);
+    if (name_len == 0)
+        return 0; // 0 for false
+
+    sprintf(fstr, "%f", value); // string form representation of float type value
+    value_len = strlen(fstr);
+    required_len = i + sizeof(char) + sizeof(uint32_t) + name_len + sizeof(uint32_t) + value_len;
+
+    ptr = (char *)realloc(stream->buffer, required_len);
+    if (ptr == NULL)
+        return 0; // for false
+
+    norder_name_len = htonl(name_len);
+    norder_value_len = htonl(value_len);
+    name_index = i + sizeof(char) + sizeof(uint32_t);
+    value_len_index = name_index + name_len;
+    value_index = value_len_index + sizeof(uint32_t);
+
+    stream->buffer = ptr;
+    stream->buffer[i] = float_e;
+    memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
+    memcpy(stream->buffer + name_index, name, name_len);
+    memcpy(stream->buffer + value_len_index, &norder_value_len, sizeof(uint32_t));
+    memcpy(stream->buffer + value_index, fstr, value_len);
+    stream->len = required_len;
+    return 1; // for true
 }
 
 int add_double_to_byte_stream(byte_stream *stream, const char *name, double value)
 {
+    uint32_t name_len;
+    uint32_t value_len;
+    uint32_t i;
+    uint32_t required_len;
+    uint32_t norder_name_len;
+    uint32_t norder_value_len;
+    uint32_t name_index;
+    uint32_t value_index;
+    uint32_t value_len_index;
+    char *ptr;
+    char dstr[2001];
+
+    if (stream == NULL || name == NULL)
+        return 0; // 0 for false
+    i = stream->len;
+    name_len = strlen(name);
+    if (name_len == 0)
+        return 0; // 0 for false
+
+    sprintf(dstr, "%f", value); // string form representation of double type value
+    value_len = strlen(dstr);
+    required_len = i + sizeof(char) + sizeof(uint32_t) + name_len + sizeof(uint32_t) + value_len;
+
+    ptr = (char *)realloc(stream->buffer, required_len);
+    if (ptr == NULL)
+        return 0; // for false
+
+    norder_name_len = htonl(name_len);
+    norder_value_len = htonl(value_len);
+    name_index = i + sizeof(char) + sizeof(uint32_t);
+    value_len_index = name_index + name_len;
+    value_index = value_len_index + sizeof(uint32_t);
+
+    stream->buffer = ptr;
+    stream->buffer[i] = double_e;
+    memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
+    memcpy(stream->buffer + name_index, name, name_len);
+    memcpy(stream->buffer + value_len_index, &norder_value_len, sizeof(uint32_t));
+    memcpy(stream->buffer + value_index, dstr, value_len);
+    stream->len = required_len;
+    return 1; // for true
 }
 
 int add_long_double_to_byte_stream(byte_stream *stream, const char *name, long double value)
 {
+    uint32_t name_len;
+    uint32_t value_len;
+    uint32_t i;
+    uint32_t required_len;
+    uint32_t norder_name_len;
+    uint32_t norder_value_len;
+    uint32_t name_index;
+    uint32_t value_index;
+    uint32_t value_len_index;
+    char *ptr;
+    char ldstr[2001];
+
+    if (stream == NULL || name == NULL)
+        return 0; // 0 for false
+    i = stream->len;
+    name_len = strlen(name);
+    if (name_len == 0)
+        return 0; // 0 for false
+
+    sprintf(ldstr, "%Lf", value); // string form representation of double type value
+    value_len = strlen(ldstr);
+    required_len = i + sizeof(char) + sizeof(uint32_t) + name_len + sizeof(uint32_t) + value_len;
+
+    ptr = (char *)realloc(stream->buffer, required_len);
+    if (ptr == NULL)
+        return 0; // for false
+
+    norder_name_len = htonl(name_len);
+    norder_value_len = htonl(value_len);
+    name_index = i + sizeof(char) + sizeof(uint32_t);
+    value_len_index = name_index + name_len;
+    value_index = value_len_index + sizeof(uint32_t);
+
+    stream->buffer = ptr;
+    stream->buffer[i] = long_double_e;
+    memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
+    memcpy(stream->buffer + name_index, name, name_len);
+    memcpy(stream->buffer + value_len_index, &norder_value_len, sizeof(uint32_t));
+    memcpy(stream->buffer + value_index, ldstr, value_len);
+    stream->len = required_len;
+    return 1; // for true
 }
 
 int main()
@@ -465,18 +588,28 @@ int main()
     uint64_t decoded_num;
     char *p;
 
+    double rr = 4345.339930;
+
+    long double uu = 435345.623230;
+
     stream = create_byte_stream();
-    add_char_to_byte_stream(stream, "gender", 'M');
+    // add_char_to_byte_stream(stream, "gender", 'M');
 
-    add_string_to_byte_stream(stream, "first name of student", "Sammer Gupta");
+    // add_string_to_byte_stream(stream, "first name of student", "Sammer Gupta");
 
-    add_int8_to_byte_stream(stream, "AGE", 66);
+    // add_int8_to_byte_stream(stream, "AGE", 66);
 
-    add_uint8_to_byte_stream(stream, "Total distance to cover before halting for lunch", 122);
+    // add_uint8_to_byte_stream(stream, "Total distance to cover before halting for lunch", 122);
 
-    add_int64_to_byte_stream(stream, "Total height to cover before resting for lunch", 90);
+    // add_int64_to_byte_stream(stream, "Total height to cover before resting for lunch", 90);
 
-    add_uint64_to_byte_stream(stream, "Total depth to cover before going back up", 57);
+    // add_uint64_to_byte_stream(stream, "Total depth to cover before going back up", 57);
+
+    // add_float_to_byte_stream(stream, "Basic Salary : ", 4545.33f);
+
+    // add_double_to_byte_stream(stream, "Total PPF : ", rr);
+
+    add_long_double_to_byte_stream(stream, "Total accumalated amount : ", uu);
 
     str = get_byte_stream(stream);
     stream_len = get_byte_stream_length(stream);
