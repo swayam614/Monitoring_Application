@@ -24,6 +24,14 @@ typedef struct _byte_stream
     uint32_t len;
 } byte_stream;
 
+typedef struct _byte_stream_elements
+{
+} byte_stream_elements;
+
+typedef struct _byte_stream_element
+{
+} byte_stream_element;
+
 int is_big_endian()
 {
     return __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__;
@@ -58,7 +66,11 @@ byte_stream *create_byte_stream()
     return stream;
 }
 
-char *get_byte_stream(byte_stream *stream)
+byte_stream *create_byte_stream_from_bytes(char *bytes, uint32_t len)
+{
+}
+
+char *get_byte_stream_bytes(byte_stream *stream)
 {
     if (stream == NULL)
         return NULL;
@@ -576,6 +588,123 @@ int add_long_double_to_byte_stream(byte_stream *stream, const char *name, long d
     return 1; // for true
 }
 
+byte_stream_elements *get_byte_stream_elements(byte_stream *stream)
+{
+}
+
+uint32_t get_byte_stream_elements_length(byte_stream_elements *elements)
+{
+}
+
+byte_stream_element *get_byte_stream_element(byte_stream_elements *elements, uint32_t index)
+{
+}
+
+void release_byte_stream_elements(byte_stream_elements *elements)
+{
+}
+
+void release_byte_stream_element(byte_stream_element *element)
+{
+}
+
+char *get_byte_stream_element_name(byte_stream_element *element)
+{
+}
+
+int is_byte_stream_element_char(byte_stream_element *element)
+{
+}
+
+int is_byte_stream_element_string(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_int8(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_int16(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_int32(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_int64(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_uint8(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_uint16(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_uint32(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_uint64(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_float(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_double(byte_stream_element *element)
+{
+}
+int is_byte_stream_element_long_double(byte_stream_element *element)
+{
+}
+
+int get_byte_stream_element_char(byte_stream_element *element, char *c)
+{
+}
+
+int get_byte_stream_element_string(byte_stream_element *element, char **ptr2str)
+{
+}
+
+int get_byte_stream_element_int8(byte_stream_element *element, int8_t *ptr)
+{
+}
+
+int get_byte_stream_element_int16(byte_stream_element *element, int16_t *ptr)
+{
+}
+
+int get_byte_stream_element_int32(byte_stream_element *element, int32_t *ptr)
+{
+}
+
+int get_byte_stream_element_int64(byte_stream_element *element, int64_t *ptr)
+{
+}
+
+int get_byte_stream_element_uint8(byte_stream_element *element, uint8_t *ptr)
+{
+}
+
+int get_byte_stream_element_uint16(byte_stream_element *element, uint16_t *ptr)
+{
+}
+
+int get_byte_stream_element_uint32(byte_stream_element *element, uint32_t *ptr)
+{
+}
+
+int get_byte_stream_element_uint64(byte_stream_element *element, uint64_t *ptr)
+{
+}
+
+int get_byte_stream_element_float(byte_stream_element *element, float *ptr)
+{
+}
+
+int get_byte_stream_element_double(byte_stream_element *element, double *ptr)
+{
+}
+
+int get_byte_stream_element_long_double(byte_stream_element *element, long double *ptr)
+{
+}
+
 int main()
 {
     byte_stream *stream;
@@ -583,6 +712,30 @@ int main()
     char *str;
     uint32_t stream_len;
 
+    // -- other side
+    byte_stream *other_stream;
+    byte_stream_elements *elements;
+    byte_stream_element *element;
+    uint32_t str2len;
+    uint32_t number_of_elements;
+
+    char v0;
+    char *v1;
+    int8_t v2;
+    int16_t v3;
+    int32_t v4;
+    int64_t v5;
+    uint8_t v6;
+    uint16_t v7;
+    uint32_t v8;
+    uint64_t v9;
+    float v10;
+    double v11;
+    long double v12;
+    char *str2;
+    char *name;
+
+    // ------------------------
     uint64_t num;
     uint64_t norder_num;
     uint64_t decoded_num;
@@ -593,25 +746,25 @@ int main()
     long double uu = 435345.623230;
 
     stream = create_byte_stream();
-    // add_char_to_byte_stream(stream, "gender", 'M');
+    add_char_to_byte_stream(stream, "gender", 'M');
 
-    // add_string_to_byte_stream(stream, "first name of student", "Sammer Gupta");
+    add_string_to_byte_stream(stream, "first name of student", "Sammer Gupta");
 
-    // add_int8_to_byte_stream(stream, "AGE", 66);
+    add_int8_to_byte_stream(stream, "AGE", 66);
 
-    // add_uint8_to_byte_stream(stream, "Total distance to cover before halting for lunch", 122);
+    add_uint8_to_byte_stream(stream, "Total distance to cover before halting for lunch", 122);
 
-    // add_int64_to_byte_stream(stream, "Total height to cover before resting for lunch", 90);
+    add_int64_to_byte_stream(stream, "Total height to cover before resting for lunch", 90);
 
-    // add_uint64_to_byte_stream(stream, "Total depth to cover before going back up", 57);
+    add_uint64_to_byte_stream(stream, "Total depth to cover before going back up", 57);
 
-    // add_float_to_byte_stream(stream, "Basic Salary : ", 4545.33f);
+    add_float_to_byte_stream(stream, "Basic Salary : ", 4545.33f);
 
-    // add_double_to_byte_stream(stream, "Total PPF : ", rr);
+    add_double_to_byte_stream(stream, "Total PPF : ", rr);
 
     add_long_double_to_byte_stream(stream, "Total accumalated amount : ", uu);
 
-    str = get_byte_stream(stream);
+    str = get_byte_stream_bytes(stream);
     stream_len = get_byte_stream_length(stream);
     for (i = 0; i < stream_len; i++)
     {
@@ -650,6 +803,83 @@ int main()
         printf("%d    ", *p);
     }
     printf("\n");
+
+    // Assumne that the above code got executed on one side of the network
+    // on the other end , a stream is received and str2 is the storing the base address
+
+    str2 = (char *)malloc(sizeof(char) * stream->len);
+    str2len = stream->len;
+    memcpy(str2, str, stream->len);
+    release_byte_stream(stream);
+    // Assumne that the following code is running on the other  side of network
+
+    other_stream = create_byte_stream_from_bytes(str2, str2len);
+
+    // now the owner of the sequence of bytes is bytes stream
+
+    elements = get_byte_stream_elements(other_stream);
+
+    number_of_elements = get_byte_stream_elements_length(elements);
+
+    for (i = 0; i < number_of_elements; i++)
+    {
+
+        element = get_byte_stream_element(elements, i);
+        name = get_byte_stream_element_name(element);
+
+        if (is_byte_stream_element_char(element))
+        {
+            get_byte_stream_element_char(element, &v0); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_string(element))
+        {
+            get_byte_stream_element_string(element, &v1); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_int8(element))
+        {
+            get_byte_stream_element_int8(element, &v2); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_int16(element))
+        {
+            get_byte_stream_element_int16(element, &v3); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_int32(element))
+        {
+            get_byte_stream_element_int32(element, &v4); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_int64(element))
+        {
+            get_byte_stream_element_int64(element, &v5); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_uint8(element))
+        {
+            get_byte_stream_element_uint8(element, &v6); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_uint16(element))
+        {
+            get_byte_stream_element_uint16(element, &v7); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_uint32(element))
+        {
+            get_byte_stream_element_uint32(element, &v8); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_uint64(element))
+        {
+            get_byte_stream_element_uint64(element, &v9); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_float(element))
+        {
+            get_byte_stream_element_float(element, &v10); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_double(element))
+        {
+            get_byte_stream_element_double(element, &v11); // will return true or false (1 or 0)
+        }
+        if (is_byte_stream_element_long_double(element))
+        {
+            get_byte_stream_element_long_double(element, &v12); // will return true or false (1 or 0)
+        }
+    }
 
     return 0;
 }
