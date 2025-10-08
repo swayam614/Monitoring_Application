@@ -22,14 +22,21 @@ typedef struct _byte_stream
 {
     char *buffer;
     uint32_t len;
+    uint32_t elements_count;
 } byte_stream;
 
 typedef struct _byte_stream_elements
 {
+    char **elements_ptr;
 } byte_stream_elements;
 
 typedef struct _byte_stream_element
 {
+    char type;
+    uint32_t name_len;
+    char *name;
+    uint32_t value_len;
+    char *value;
 } byte_stream_element;
 
 int is_big_endian()
@@ -55,14 +62,41 @@ uint64_t ntohl64(uint64_t v)
     return (((uint64_t)htonl(v & 0xFFFFFFFF)) << 32) | htonl(v >> 32);
 }
 
+void update_byte_stream_header(byte_stream *stream, uint32_t len, uint32_t elements_count)
+{
+    uint32_t norder_len;
+    uint32_t norder_elements_count;
+
+    if (stream == NULL)
+        return;
+
+    norder_len = htonl(len);
+    norder_elements_count = htonl(elements_count);
+    memcpy(stream->buffer, &norder_len, sizeof(uint32_t));
+    memcpy(stream->buffer + sizeof(uint32_t), &norder_elements_count, sizeof(uint32_t));
+    stream->len = len;
+    stream->elements_count = elements_count;
+}
+
 byte_stream *create_byte_stream()
 {
+    uint32_t norder_len;
     byte_stream *stream;
     stream = (byte_stream *)malloc(sizeof(byte_stream));
     if (stream == NULL)
         return NULL;
-    stream->len = 0;
-    stream->buffer = NULL;
+
+    stream->buffer = (char *)malloc(sizeof(uint32_t) + sizeof(uint32_t));
+    if (stream->buffer == NULL)
+    {
+        free(stream);
+        return NULL;
+    }
+
+    stream->len = sizeof(uint32_t) + sizeof(uint32_t);
+    norder_len = htonl(stream->len);
+    memset(stream->buffer, 0, stream->len);
+    memcpy(stream->buffer, &norder_len, sizeof(uint32_t));
     return stream;
 }
 
