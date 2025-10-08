@@ -27,6 +27,7 @@ typedef struct _byte_stream
 
 typedef struct _byte_stream_elements
 {
+    byte_stream *stream;
     char **elements_ptr;
 } byte_stream_elements;
 
@@ -60,6 +61,35 @@ uint64_t ntohl64(uint64_t v)
     if (is_big_endian())
         return v;
     return (((uint64_t)htonl(v & 0xFFFFFFFF)) << 32) | htonl(v >> 32);
+}
+
+uint32_t get_byte_Stream_type_size(char type)
+{
+    if (type == char_e)
+        return sizeof(char);
+    else if (type == int8_e)
+        return sizeof(int8_t);
+    else if (type == int16_e)
+        return sizeof(int16_t);
+    else if (type == int32_e)
+        return sizeof(int32_t);
+    else if (type == int64_e)
+        return sizeof(int64_t);
+    else if (type == uint8_e)
+        return sizeof(uint8_t);
+    else if (type == uint16_e)
+        return sizeof(uint16_t);
+    else if (type == uint32_e)
+        return sizeof(uint32_t);
+    else if (type == uint64_e)
+        return sizeof(uint64_t);
+    else
+        return 0;
+}
+
+int is_byte_stream_type_valid(char type)
+{
+    return type >= 'A' && type <= 'M';
 }
 
 void update_byte_stream_header(byte_stream *stream, uint32_t len, uint32_t elements_count)
@@ -100,8 +130,36 @@ byte_stream *create_byte_stream()
     return stream;
 }
 
-byte_stream *create_byte_stream_from_bytes(char *bytes, uint32_t len)
+byte_stream *create_byte_stream_from_bytes(char *bytes, uint32_t length)
 {
+    byte_stream *stream;
+    uint32_t norder_len;
+    uint32_t norder_elements_count;
+    uint32_t len;
+    uint32_t elements_count;
+
+    memcpy(&norder_len, bytes, sizeof(uint32_t));
+    len = ntohl(norder_len);
+    if (len != length)
+        return NULL; // something is invalid about the stream
+
+    memcpy(&norder_elements_count, bytes + sizeof(uint32_t), sizeof(uint32_t));
+    elements_count = ntohl(norder_elements_count);
+    if (elements_count < 0)
+        return NULL;
+    if (elements_count == 0 && length > (sizeof(uint32_t) + sizeof(uint32_t)))
+    {
+        return NULL;
+    } // more code to check the valiadity of the stream , implement it later
+
+    stream = (byte_stream *)malloc(sizeof(byte_stream));
+    if (stream == NULL)
+        return NULL;
+
+    stream->buffer = bytes; // Now the owner the library creator the user should not free bytes
+    stream->len = length;
+    stream->elements_count = elements_count;
+    return stream;
 }
 
 char *get_byte_stream_bytes(byte_stream *stream)
@@ -157,7 +215,7 @@ int add_char_to_byte_stream(byte_stream *stream, const char *name, char value)
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     stream->buffer[value_index] = value;
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -199,7 +257,7 @@ int add_string_to_byte_stream(byte_stream *stream, const char *name, const char 
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + name_index + name_len, &norder_value_len, sizeof(uint32_t));
     memcpy(stream->buffer + value_index, value, value_len);
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1;
 }
 
@@ -233,7 +291,7 @@ int add_int8_to_byte_stream(byte_stream *stream, const char *name, int8_t value)
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &value, sizeof(int8_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -269,7 +327,7 @@ int add_int16_to_byte_stream(byte_stream *stream, const char *name, int16_t valu
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &norder_value, sizeof(int16_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -305,7 +363,7 @@ int add_int32_to_byte_stream(byte_stream *stream, const char *name, int32_t valu
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &norder_value, sizeof(int32_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -341,7 +399,7 @@ int add_int64_to_byte_stream(byte_stream *stream, const char *name, int64_t valu
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &norder_value, sizeof(int64_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -375,7 +433,7 @@ int add_uint8_to_byte_stream(byte_stream *stream, const char *name, uint8_t valu
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &value, sizeof(uint8_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -411,7 +469,7 @@ int add_uint16_to_byte_stream(byte_stream *stream, const char *name, uint16_t va
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &norder_value, sizeof(uint16_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -447,7 +505,7 @@ int add_uint32_to_byte_stream(byte_stream *stream, const char *name, uint32_t va
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &norder_value, sizeof(uint32_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -483,7 +541,7 @@ int add_uint64_to_byte_stream(byte_stream *stream, const char *name, uint64_t va
     memcpy(stream->buffer + i + sizeof(char), &norder_name_len, sizeof(uint32_t));
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_index, &norder_value, sizeof(uint64_t));
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -528,7 +586,7 @@ int add_float_to_byte_stream(byte_stream *stream, const char *name, float value)
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_len_index, &norder_value_len, sizeof(uint32_t));
     memcpy(stream->buffer + value_index, fstr, value_len);
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -573,7 +631,7 @@ int add_double_to_byte_stream(byte_stream *stream, const char *name, double valu
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_len_index, &norder_value_len, sizeof(uint32_t));
     memcpy(stream->buffer + value_index, dstr, value_len);
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -618,7 +676,7 @@ int add_long_double_to_byte_stream(byte_stream *stream, const char *name, long d
     memcpy(stream->buffer + name_index, name, name_len);
     memcpy(stream->buffer + value_len_index, &norder_value_len, sizeof(uint32_t));
     memcpy(stream->buffer + value_index, ldstr, value_len);
-    stream->len = required_len;
+    update_byte_stream_header(stream, required_len, stream->elements_count + 1);
     return 1; // for true
 }
 
@@ -628,6 +686,10 @@ byte_stream_elements *get_byte_stream_elements(byte_stream *stream)
 
 uint32_t get_byte_stream_elements_length(byte_stream_elements *elements)
 {
+    if (elements == NULL)
+        return NULL;
+
+    return elements->stream->elements_count;
 }
 
 byte_stream_element *get_byte_stream_element(byte_stream_elements *elements, uint32_t index)
@@ -644,47 +706,108 @@ void release_byte_stream_element(byte_stream_element *element)
 
 char *get_byte_stream_element_name(byte_stream_element *element)
 {
+    char *str;
+    if (element == NULL)
+        return NULL;
+    str = (char *)malloc(sizeof(char) * ((element->name_len) + 1));
+    if (str == NULL)
+        return NULL;
+    memcpy(str, element->name, element->name_len);
+    str[element->name_len] = '\0';
+    return str;
 }
 
 int is_byte_stream_element_char(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = char_e;
 }
 
 int is_byte_stream_element_string(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = string_e;
 }
 int is_byte_stream_element_int8(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = int8_e;
 }
 int is_byte_stream_element_int16(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = int16_e;
 }
 int is_byte_stream_element_int32(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = int32_e;
 }
 int is_byte_stream_element_int64(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = int64_e;
 }
 int is_byte_stream_element_uint8(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = uint8_e;
 }
 int is_byte_stream_element_uint16(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = uint16_e;
 }
 int is_byte_stream_element_uint32(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = uint32_e;
 }
 int is_byte_stream_element_uint64(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = uint64_e;
 }
 int is_byte_stream_element_float(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = float_e;
 }
 int is_byte_stream_element_double(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = double_e;
 }
 int is_byte_stream_element_long_double(byte_stream_element *element)
 {
+    if (element == NULL)
+        return 0; // for false;
+
+    return element->type = long_double_e;
 }
 
 int get_byte_stream_element_char(byte_stream_element *element, char *c)
@@ -841,6 +964,7 @@ int main()
     // Assumne that the above code got executed on one side of the network
     // on the other end , a stream is received and str2 is the storing the base address
 
+    /*
     str2 = (char *)malloc(sizeof(char) * stream->len);
     str2len = stream->len;
     memcpy(str2, str, stream->len);
@@ -913,7 +1037,13 @@ int main()
         {
             get_byte_stream_element_long_double(element, &v12); // will return true or false (1 or 0)
         }
+        release_byte_stream_element(element);
     }
+    release_byte_stream_elements(elements);
+    release_byte_stream(other_stream);
+
+
+    */
 
     return 0;
 }
