@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <errno.h>
 #include <stdio.h> // to be removed
+#include <inttypes.h>
 
 #define char_e 'A'
 #define string_e 'B'
@@ -63,7 +65,7 @@ uint64_t ntohl64(uint64_t v)
     return (((uint64_t)htonl(v & 0xFFFFFFFF)) << 32) | htonl(v >> 32);
 }
 
-uint32_t get_byte_Stream_type_size(char type)
+uint32_t get_type_size(char type)
 {
     if (type == char_e)
         return sizeof(char);
@@ -682,26 +684,127 @@ int add_long_double_to_byte_stream(byte_stream *stream, const char *name, long d
 
 byte_stream_elements *get_byte_stream_elements(byte_stream *stream)
 {
+    byte_stream_elements *elements;
+    char type;
+    uint32_t name_len;
+    uint32_t norder_name_len;
+    char *str;
+    uint32_t value_len;
+    uint32_t norder_value_len;
+    int i;
+
+    if (stream == NULL || stream->elements_count == 0)
+        return NULL;
+
+    elements = (byte_stream_elements *)malloc(sizeof(byte_stream_elements));
+    if (elements == NULL)
+        return NULL;
+    elements->stream = stream;
+    elements->elements_ptr = (char **)malloc(sizeof(char *) * stream->elements_count);
+    if (elements->elements_ptr == NULL)
+    {
+        free(elements);
+        return NULL;
+    }
+    i = 0;
+    str = stream->buffer + sizeof(uint32_t) + sizeof(uint32_t); // str now points to next to header
+    while (i < stream->elements_count)
+    {
+        elements->elements_ptr[i] = str;
+        type = *str;
+        str++; // skipped the type part
+        memcpy(&norder_name_len, str, sizeof(uint32_t));
+        name_len = ntohl(norder_name_len);
+
+        str += sizeof(uint32_t);
+        str += name_len;
+
+        if (type == string_e || type == float_e || type == double_e || type == long_double_e)
+        {
+            memcpy(&norder_value_len, str, sizeof(uint32_t));
+            value_len = ntohl(norder_value_len);
+            str += sizeof(uint32_t);
+            str += value_len;
+        }
+        else
+        {
+            str += get_type_size(type);
+        }
+
+        i++;
+    }
+
+    return elements;
 }
 
 uint32_t get_byte_stream_elements_length(byte_stream_elements *elements)
 {
     if (elements == NULL)
-        return NULL;
+        return 0;
 
     return elements->stream->elements_count;
 }
 
 byte_stream_element *get_byte_stream_element(byte_stream_elements *elements, uint32_t index)
 {
+    byte_stream_element *element;
+    uint32_t norder_name_len;
+    uint32_t norder_value_len;
+    char *str;
+    char type;
+    uint32_t name_len;
+    uint32_t value_len;
+
+    if (elements == NULL)
+        return NULL;
+    if (index < 0 || index >= elements->stream->elements_count)
+        return NULL;
+
+    element = (byte_stream_element *)malloc(sizeof(byte_stream_element));
+    if (element == NULL)
+        return NULL;
+
+    str = elements->elements_ptr[index];
+    type = *str;
+    element->type = type;
+    str++; // skipped the type part
+    memcpy(&norder_name_len, str, sizeof(uint32_t));
+    name_len = ntohl(norder_name_len);
+    element->name_len = name_len;
+    str += sizeof(uint32_t);
+    element->name = str;
+    str += name_len;
+
+    if (type == string_e || type == float_e || type == double_e || type == long_double_e)
+    {
+        memcpy(&norder_value_len, str, sizeof(uint32_t));
+        value_len = ntohl(norder_value_len);
+        element->value_len = value_len;
+        str += sizeof(uint32_t);
+        element->value = str;
+    }
+    else
+    {
+        element->value_len = get_type_size(type);
+        element->value = str;
+    }
+    return element;
 }
 
 void release_byte_stream_elements(byte_stream_elements *elements)
 {
+    if (elements == NULL)
+        return;
+
+    free(elements->elements_ptr);
+    free(elements);
 }
 
 void release_byte_stream_element(byte_stream_element *element)
 {
+    if (element == NULL)
+        return;
+    free(element);
 }
 
 char *get_byte_stream_element_name(byte_stream_element *element)
@@ -722,7 +825,7 @@ int is_byte_stream_element_char(byte_stream_element *element)
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = char_e;
+    return element->type == char_e;
 }
 
 int is_byte_stream_element_string(byte_stream_element *element)
@@ -730,140 +833,322 @@ int is_byte_stream_element_string(byte_stream_element *element)
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = string_e;
+    return element->type == string_e;
 }
 int is_byte_stream_element_int8(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = int8_e;
+    return element->type == int8_e;
 }
 int is_byte_stream_element_int16(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = int16_e;
+    return element->type == int16_e;
 }
 int is_byte_stream_element_int32(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = int32_e;
+    return element->type == int32_e;
 }
 int is_byte_stream_element_int64(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = int64_e;
+    return element->type == int64_e;
 }
 int is_byte_stream_element_uint8(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = uint8_e;
+    return element->type == uint8_e;
 }
 int is_byte_stream_element_uint16(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = uint16_e;
+    return element->type == uint16_e;
 }
 int is_byte_stream_element_uint32(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = uint32_e;
+    return element->type == uint32_e;
 }
 int is_byte_stream_element_uint64(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = uint64_e;
+    return element->type == uint64_e;
 }
 int is_byte_stream_element_float(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = float_e;
+    return element->type == float_e;
 }
 int is_byte_stream_element_double(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = double_e;
+    return element->type == double_e;
 }
 int is_byte_stream_element_long_double(byte_stream_element *element)
 {
     if (element == NULL)
         return 0; // for false;
 
-    return element->type = long_double_e;
+    return element->type == long_double_e;
 }
 
+// 0 for false
+// 1 for true or success
 int get_byte_stream_element_char(byte_stream_element *element, char *c)
 {
+    if (element == NULL || c == NULL)
+        return 0; // 0 for false
+
+    if (element->type != char_e)
+        return 0;
+
+    *c = *(element->value);
+    return 1; // 1 for true or success
 }
 
 int get_byte_stream_element_string(byte_stream_element *element, char **ptr2str)
 {
+    char *str;
+
+    if (element == NULL || ptr2str == NULL)
+        return 0;
+
+    if (element->type != string_e)
+        return 0;
+
+    str = (char *)malloc(sizeof(char) * (element->value_len + 1));
+    if (str == NULL)
+    {
+        *ptr2str = NULL;
+        return 0;
+    }
+
+    memcpy(str, element->value, element->value_len);
+    str[element->name_len] = '\0';
+    *ptr2str = str;
+
+    return 1;
 }
 
 int get_byte_stream_element_int8(byte_stream_element *element, int8_t *ptr)
 {
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != int8_e)
+        return 0;
+
+    memcpy(ptr, element->value, sizeof(int8_t));
+    return 1;
 }
 
 int get_byte_stream_element_int16(byte_stream_element *element, int16_t *ptr)
 {
+    uint16_t norder_value;
+    uint16_t value;
+
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != int16_e)
+        return 0;
+
+    memcpy(&norder_value, element->value, element->value_len);
+    value = ntohs(norder_value);
+    memcpy(ptr, &value, sizeof(uint16_t));
+    return 1;
 }
 
 int get_byte_stream_element_int32(byte_stream_element *element, int32_t *ptr)
 {
+    uint32_t norder_value;
+    uint32_t value;
+
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != int32_e)
+        return 0;
+
+    memcpy(&norder_value, element->value, element->value_len);
+    value = ntohl(norder_value);
+    memcpy(ptr, &value, sizeof(uint32_t));
+    return 1;
 }
 
 int get_byte_stream_element_int64(byte_stream_element *element, int64_t *ptr)
 {
+    uint64_t norder_value;
+    uint64_t value;
+
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != int64_e)
+        return 0;
+
+    memcpy(&norder_value, element->value, element->value_len);
+    value = ntohl64(norder_value);
+    memcpy(ptr, &value, sizeof(uint64_t));
+    return 1;
 }
 
 int get_byte_stream_element_uint8(byte_stream_element *element, uint8_t *ptr)
 {
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != uint8_e)
+        return 0;
+
+    memcpy(ptr, element->value, sizeof(uint8_t));
+    return 1;
 }
 
 int get_byte_stream_element_uint16(byte_stream_element *element, uint16_t *ptr)
 {
+    uint16_t norder_value;
+    uint16_t value;
+
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != uint16_e)
+        return 0;
+
+    memcpy(&norder_value, element->value, element->value_len);
+    value = ntohs(norder_value);
+    memcpy(ptr, &value, sizeof(uint16_t));
+    return 1;
 }
 
 int get_byte_stream_element_uint32(byte_stream_element *element, uint32_t *ptr)
 {
+    uint32_t norder_value;
+    uint32_t value;
+
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != uint32_e)
+        return 0;
+
+    memcpy(&norder_value, element->value, element->value_len);
+    value = ntohl(norder_value);
+    memcpy(ptr, &value, sizeof(uint32_t));
+    return 1;
 }
 
 int get_byte_stream_element_uint64(byte_stream_element *element, uint64_t *ptr)
 {
+    uint64_t norder_value;
+    uint64_t value;
+
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != uint64_e)
+        return 0;
+
+    memcpy(&norder_value, element->value, element->value_len);
+    value = ntohl64(norder_value);
+    memcpy(ptr, &value, sizeof(uint64_t));
+    return 1;
 }
 
 int get_byte_stream_element_float(byte_stream_element *element, float *ptr)
 {
+    char *str;
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != float_e)
+        return 0;
+
+    str = (char *)malloc(sizeof(char) * (element->value_len + 1));
+    if (str == NULL)
+        return 0;
+
+    memcpy(str, element->value, element->value_len);
+    str[element->value_len] = '\0';
+    errno = 0;
+
+    *ptr = strtof(str, NULL);
+    if (errno != 0)
+        return 0;
+    return 1;
 }
 
 int get_byte_stream_element_double(byte_stream_element *element, double *ptr)
 {
+    char *str;
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != double_e)
+        return 0;
+
+    str = (char *)malloc(sizeof(char) * (element->value_len + 1));
+    if (str == NULL)
+        return 0;
+
+    memcpy(str, element->value, element->value_len);
+    str[element->value_len] = '\0';
+    errno = 0;
+
+    *ptr = strtod(str, NULL);
+    if (errno != 0)
+        return 0;
+    return 1;
 }
 
 int get_byte_stream_element_long_double(byte_stream_element *element, long double *ptr)
 {
+    char *str;
+    if (element == NULL || ptr == NULL)
+        return 0;
+
+    if (element->type != long_double_e)
+        return 0;
+
+    str = (char *)malloc(sizeof(char) * (element->value_len + 1));
+    if (str == NULL)
+        return 0;
+
+    memcpy(str, element->value, element->value_len);
+    str[element->value_len] = '\0';
+    errno = 0;
+
+    *ptr = strtold(str, NULL);
+    if (errno != 0)
+        return 0;
+    return 1;
 }
 
 int main()
 {
+    int success;
     byte_stream *stream;
     int i;
     char *str;
@@ -907,9 +1192,9 @@ int main()
 
     add_string_to_byte_stream(stream, "first name of student", "Sammer Gupta");
 
-    add_int8_to_byte_stream(stream, "AGE", 66);
+    add_int32_to_byte_stream(stream, "AGE", 66);
 
-    add_uint8_to_byte_stream(stream, "Total distance to cover before halting for lunch", 122);
+    add_uint32_to_byte_stream(stream, "Total distance to cover before halting for lunch", 122);
 
     add_int64_to_byte_stream(stream, "Total height to cover before resting for lunch", 90);
 
@@ -936,35 +1221,34 @@ int main()
 
     printf("\n---------------------------------------------\n");
 
-    num = 5334535;
-    norder_num = htonl64(num);
-    printf("Initial : ");
-    p = (char *)&num;
-    for (i = 0; i < sizeof(uint64_t); i++, p++)
-    {
-        printf("%d    ", *p);
-    }
+    // num = 5334535;
+    // norder_num = htonl64(num);
+    // printf("Initial : ");
+    // p = (char *)&num;
+    // for (i = 0; i < sizeof(uint64_t); i++, p++)
+    // {
+    //     printf("%d    ", *p);
+    // }
 
-    printf("\n");
-    p = (char *)&norder_num;
-    for (i = 0; i < sizeof(uint64_t); i++, p++)
-    {
-        printf("%d    ", *p);
-    }
-    printf("\n");
+    // printf("\n");
+    // p = (char *)&norder_num;
+    // for (i = 0; i < sizeof(uint64_t); i++, p++)
+    // {
+    //     printf("%d    ", *p);
+    // }
+    // printf("\n");
 
-    decoded_num = ntohl64(norder_num);
-    p = (char *)&decoded_num;
-    for (i = 0; i < sizeof(uint64_t); i++, p++)
-    {
-        printf("%d    ", *p);
-    }
-    printf("\n");
+    // decoded_num = ntohl64(norder_num);
+    // p = (char *)&decoded_num;
+    // for (i = 0; i < sizeof(uint64_t); i++, p++)
+    // {
+    //     printf("%d    ", *p);
+    // }
+    // printf("\n");
 
     // Assumne that the above code got executed on one side of the network
     // on the other end , a stream is received and str2 is the storing the base address
 
-    /*
     str2 = (char *)malloc(sizeof(char) * stream->len);
     str2len = stream->len;
     memcpy(str2, str, stream->len);
@@ -981,69 +1265,134 @@ int main()
 
     for (i = 0; i < number_of_elements; i++)
     {
+        printf("Prcoessing element with index %d\n", i);
 
         element = get_byte_stream_element(elements, i);
+        if (element == NULL)
+        {
+            printf("Unable to extract %dth element\n", i);
+            continue;
+        }
+
         name = get_byte_stream_element_name(element);
+        if (name != NULL)
+            printf("Name : (%s)\n", name);
+        else
+        {
+            printf("Unable to extract name\n");
+            continue;
+        }
 
         if (is_byte_stream_element_char(element))
         {
-            get_byte_stream_element_char(element, &v0); // will return true or false (1 or 0)
+
+            success = get_byte_stream_element_char(element, &v0); // will return true or false (1 or 0)
+            if (success)
+                printf("Char value (%c)\n", v0);
+            else
+                printf("Unable to get char value\n");
         }
-        if (is_byte_stream_element_string(element))
+        else if (is_byte_stream_element_string(element))
         {
-            get_byte_stream_element_string(element, &v1); // will return true or false (1 or 0)
+            success = get_byte_stream_element_string(element, &v1); // will return true or false (1 or 0)
+            if (success)
+                printf("String value (%s)\n", v1);
+            else
+                printf("Unable to get string value\n");
         }
-        if (is_byte_stream_element_int8(element))
+        else if (is_byte_stream_element_int8(element))
         {
-            get_byte_stream_element_int8(element, &v2); // will return true or false (1 or 0)
+            success = get_byte_stream_element_int8(element, &v2); // will return true or false (1 or 0)
+            if (success)
+                printf("int8 value (%" PRId8 ")\n", v2);
+            else
+                printf("Unable to get int8 value\n");
         }
-        if (is_byte_stream_element_int16(element))
+        else if (is_byte_stream_element_int16(element))
         {
-            get_byte_stream_element_int16(element, &v3); // will return true or false (1 or 0)
+            success = get_byte_stream_element_int16(element, &v3); // will return true or false (1 or 0)
+            if (success)
+                printf("int16 value (%" PRId16 ")\n", v2);
+            else
+                printf("Unable to get int16 value\n");
         }
-        if (is_byte_stream_element_int32(element))
+        else if (is_byte_stream_element_int32(element))
         {
-            get_byte_stream_element_int32(element, &v4); // will return true or false (1 or 0)
+            success = get_byte_stream_element_int32(element, &v4); // will return true or false (1 or 0)
+            if (success)
+                printf("int32 value (%" PRId32 ")\n", v4);
+            else
+                printf("Unable to get int32 value\n");
         }
-        if (is_byte_stream_element_int64(element))
+        else if (is_byte_stream_element_int64(element))
         {
-            get_byte_stream_element_int64(element, &v5); // will return true or false (1 or 0)
+
+            success = get_byte_stream_element_int64(element, &v5); // will return true or false (1 or 0)
+            if (success)
+                printf("int64 value (%" PRId64 ")\n", v5);
+            else
+                printf("Unable to get int64 value\n");
         }
-        if (is_byte_stream_element_uint8(element))
+        else if (is_byte_stream_element_uint8(element))
         {
-            get_byte_stream_element_uint8(element, &v6); // will return true or false (1 or 0)
+            success = get_byte_stream_element_uint8(element, &v6); // will return true or false (1 or 0)
+            if (success)
+                printf("uint8 value (%" PRIu8 ")\n", v6);
+            else
+                printf("Unable to get uint8 value\n");
         }
-        if (is_byte_stream_element_uint16(element))
+        else if (is_byte_stream_element_uint16(element))
         {
-            get_byte_stream_element_uint16(element, &v7); // will return true or false (1 or 0)
+            success = get_byte_stream_element_uint16(element, &v7); // will return true or false (1 or 0)
+            if (success)
+                printf("uint16 value (%" PRIu16 ")\n", v7);
+            else
+                printf("Unable to get uint16 value\n");
         }
-        if (is_byte_stream_element_uint32(element))
+        else if (is_byte_stream_element_uint32(element))
         {
-            get_byte_stream_element_uint32(element, &v8); // will return true or false (1 or 0)
+            success = get_byte_stream_element_uint32(element, &v8); // will return true or false (1 or 0)
+            if (success)
+                printf("uint32 value (%" PRIu32 ")\n", v8);
+            else
+                printf("Unable to get uint32 value\n");
         }
-        if (is_byte_stream_element_uint64(element))
+        else if (is_byte_stream_element_uint64(element))
         {
-            get_byte_stream_element_uint64(element, &v9); // will return true or false (1 or 0)
+            success = get_byte_stream_element_uint64(element, &v9); // will return true or false (1 or 0)
+            if (success)
+                printf("uint64 value (%" PRIu64 ")\n", v9);
+            else
+                printf("Unable to get uint64 value\n");
         }
-        if (is_byte_stream_element_float(element))
+        else if (is_byte_stream_element_float(element))
         {
-            get_byte_stream_element_float(element, &v10); // will return true or false (1 or 0)
+            success = get_byte_stream_element_float(element, &v10); // will return true or false (1 or 0)
+            if (success)
+                printf("float value : (%f)\n", v10);
+            else
+                printf("Unable to get float value\n");
         }
-        if (is_byte_stream_element_double(element))
+        else if (is_byte_stream_element_double(element))
         {
-            get_byte_stream_element_double(element, &v11); // will return true or false (1 or 0)
+            success = get_byte_stream_element_double(element, &v11); // will return true or false (1 or 0)
+            if (success)
+                printf("double value : (%f)\n", v11);
+            else
+                printf("Unable to get double value\n");
         }
-        if (is_byte_stream_element_long_double(element))
+        else if (is_byte_stream_element_long_double(element))
         {
-            get_byte_stream_element_long_double(element, &v12); // will return true or false (1 or 0)
+            success = get_byte_stream_element_long_double(element, &v12); // will return true or false (1 or 0)
+            if (success)
+                printf("long double value : (%Lf)\n", v12);
+            else
+                printf("Unable to get long double value\n");
         }
         release_byte_stream_element(element);
     }
     release_byte_stream_elements(elements);
     release_byte_stream(other_stream);
-
-
-    */
 
     return 0;
 }
