@@ -126,6 +126,7 @@ byte_stream *create_byte_stream()
     }
 
     stream->len = sizeof(uint32_t) + sizeof(uint32_t);
+    stream->elements_count = 0;
     norder_len = htonl(stream->len);
     memset(stream->buffer, 0, stream->len);
     memcpy(stream->buffer, &norder_len, sizeof(uint32_t));
