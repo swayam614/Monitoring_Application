@@ -51,6 +51,7 @@ int add_long_double_to_byte_stream(byte_stream *stream, const char *name, long d
 byte_stream *create_byte_stream_from_bytes(char *bytes, uint32_t len);
 byte_stream_elements *get_byte_stream_elements(byte_stream *stream);
 
+uint32_t get_byte_stream_elements_count(byte_stream *steam);
 uint32_t get_byte_stream_elements_length(byte_stream_elements *elements);
 
 byte_stream_element *get_byte_stream_element(byte_stream_elements *elements, uint32_t index);
@@ -58,6 +59,8 @@ byte_stream_element *get_byte_stream_element(byte_stream_elements *elements, uin
 void release_byte_stream_elements(byte_stream_elements *elements);
 
 void release_byte_stream_element(byte_stream_element *element);
+
+int is_get_byte_stream_element_name(byte_stream_element *element, const char *name);
 
 char *get_byte_stream_element_name(byte_stream_element *element);
 
