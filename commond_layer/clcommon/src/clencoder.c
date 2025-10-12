@@ -738,6 +738,13 @@ byte_stream_elements *get_byte_stream_elements(byte_stream *stream)
     return elements;
 }
 
+uint32_t get_byte_stream_elements_count(byte_stream *stream)
+{
+    if (stream == NULL)
+        return 0;
+    return stream->elements_count;
+}
+
 uint32_t get_byte_stream_elements_length(byte_stream_elements *elements)
 {
     if (elements == NULL)
@@ -806,6 +813,23 @@ void release_byte_stream_element(byte_stream_element *element)
     if (element == NULL)
         return;
     free(element);
+}
+
+int is_get_byte_stream_element_name(byte_stream_element *element, const char *name)
+{
+    char *p;
+    const char *q;
+    int i;
+
+    if (element == NULL || name == NULL || *name == '\0')
+        return 0;
+
+    for (i = 0, p = element->name, q = name; *q != '\0' && i < element->name_len; i++, p++, q++)
+    {
+        if (*p != *q)
+            return 0;
+    }
+    return (*q == '\0' && i == element->name_len);
 }
 
 char *get_byte_stream_element_name(byte_stream_element *element)
