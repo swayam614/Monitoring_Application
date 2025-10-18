@@ -11,17 +11,17 @@ typedef struct _tcp_action_request tcp_action_request;
 typedef struct _tcp_action_response tcp_action_response;
 
 tcp_action_server *allocate_tcp_action_server(unsigned short int port);
-void on_tcp_action_server_started(tcp_action_server *server, void (*handler)(unsigned short int));
-void on_tcp_action_server_stopped(tcp_action_server *server, void (*handler)(unsigned short int));
-void tcp_action_server_add_action_mapping(tcp_action_server *server, const char *commond, void (*action)(tcp_action_request *, tcp_action_response *));
+void on_tcp_action_server_started(tcp_action_server *action_server, void (*handler)(unsigned short int));
+void on_tcp_action_server_stopped(tcp_action_server *action_server, void (*handler)(unsigned short int));
+void tcp_action_server_add_action_mapping(tcp_action_server *action_server, const char *commond, void (*action)(tcp_action_request *, tcp_action_response *));
 
-void start_tcp_action_server(tcp_action_server *server);
+void start_tcp_action_server(tcp_action_server *action_server);
 
-void stop_tcp_action_server(tcp_action_server *server);
-void release_tcp_action_server(tcp_action_server *server);
+void stop_tcp_action_server(tcp_action_server *action_server);
+void release_tcp_action_server(tcp_action_server *action_server);
 
-int tcp_action_server_failed(tcp_action_server *server);
-void tcp_action_server_error(tcp_action_server *server, char **ptr);
+int tcp_action_server_failed(tcp_action_server *action_server);
+void tcp_action_server_error(tcp_action_server *action_server, char **ptr);
 
 char *tcp_action_request_get_action_name(tcp_action_request *request);
 char *tcp_action_request_get_local_ip(tcp_action_request *request);
