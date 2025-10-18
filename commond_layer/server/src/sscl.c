@@ -44,12 +44,19 @@ typedef struct _tcp_action_handler
 
 } tcp_action_handler;
 
+tcp_action_server *global_action_server; // if everything goes well , this can be
+                                         // changed to a data structure that will enable to support
+                                         // for multiple servers in one application
+
 tcp_action_server *allocate_tcp_action_server(unsigned short int port)
 {
     tcp_action_server *action_server;
     action_server = (tcp_action_server *)malloc(sizeof(tcp_action_server));
     if (action_server == NULL)
         return NULL;
+
+    global_action_server = action_server; // this will change when we will add support for enabling
+                                          // multiple servers in one applicaiton
     action_server->server = NULL;
     action_server->error_number = 0;
     action_server->error_string = NULL;
@@ -82,15 +89,206 @@ void on_tcp_action_server_stopped(tcp_action_server *action_server, void (*handl
     on_tcp_server_stoppped(action_server->server, handler);
 }
 
-void tcp_action_server_add_action_mapping(tcp_action_server *action_server, const char *commond, void (*action)(tcp_action_request *, tcp_action_response *)) {}
+void tcp_action_server_add_action_mapping(tcp_action_server *action_server, const char *commond, void (*action)(tcp_action_request *, tcp_action_response *))
+{
+    tcp_action_handler *new_handler;
+    tcp_action_handler **temp;
+    int i;
+
+    if (action_server == NULL || commond == NULL || *commond == '\0' || action == NULL)
+    {
+        return;
+    }
+
+    for (i = 0; i < action_server->action_handlers_count; i++)
+    {
+        if (strcmp(action_server->action_handlers[i]->name, commond) == 0)
+        {
+            action_server->action_handlers[i]->action_handler = action;
+            return;
+        }
+    }
+
+    new_handler = (tcp_action_handler *)malloc(sizeof(tcp_action_handler));
+    if (new_handler == NULL)
+    {
+        // 601 is very very important part
+        if (action_server->error_number == 601 && action_server->error_string != NULL)
+        {
+            free(action_server->error_string);
+            action_server->error_string = NULL;
+        }
+        action_server->error_number = 600; // Low memory
+        return;
+    }
+
+    new_handler->name = (char *)malloc(sizeof(char) * (strlen(commond) + 1));
+    if (new_handler->name == NULL)
+    {
+        free(new_handler);
+        // 601 is very very important part
+        if (action_server->error_number == 601 && action_server->error_string != NULL)
+        {
+            free(action_server->error_string);
+            action_server->error_string = NULL;
+        }
+        action_server->error_number = 600; // Low memory
+        return;
+    }
+
+    strcpy(new_handler->name, commond);
+    new_handler->action_handler = action;
+
+    temp = (tcp_action_handler **)realloc(action_server->action_handlers, sizeof(tcp_action_handler *) * (action_server->action_handlers_count + 1));
+
+    if (temp == NULL)
+    {
+        free(new_handler->name);
+        free(new_handler);
+        // 601 is very very important part
+        if (action_server->error_number == 601 && action_server->error_string != NULL)
+        {
+            free(action_server->error_string);
+            action_server->error_string = NULL;
+        }
+        action_server->error_number = 600; // Low memory
+        return;
+    }
+
+    temp[action_server->action_handlers_count] = new_handler;
+    action_server->action_handlers = temp;
+    action_server->action_handlers_count++;
+}
 
 void action_client_connected_handler(unsigned short int port, tcp_server *server, tcp_client *client)
 {
-    // over here we will extract request bytes from tcp_client
-    // then we will create byte_stream from it
-    // then we will extract action name from it
-    // over here we will traverse the action handlers data structure
-    // and look for action name and call appropriate action handler function
+    tcp_action_handler *action_handler;
+    int i;
+    tcp_action_request *request;
+    tcp_action_response *response;
+    char *str;
+    uint32_t str_len;
+
+    if (global_action_server == NULL || server == NULL || client == NULL)
+        return;
+
+    str = tcp_client_receive(client, &str_len);
+    if (str == NULL || tcp_client_failed(client))
+    {
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    request = (tcp_action_request *)malloc(sizeof(tcp_action_request));
+    if (request == NULL)
+    {
+        // later on add something to server log
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    response = (tcp_action_response *)malloc(sizeof(tcp_action_response));
+    if (response == NULL)
+    {
+        // later on add something to server log
+        free(request);
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    response->client = client;
+    response->error_number = 0;
+    response->error_string = NULL;
+    response->stream = create_byte_stream();
+    if (response->stream == NULL)
+    {
+        free(request);
+        free(response);
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    request->client = client;
+    request->error_number = 0;
+    request->error_string = NULL;
+    request->server = global_action_server; // this will change when support to enable
+                                            // mulitple servers is added
+    request->stream = create_byte_stream_from_bytes(str, str_len);
+    if (request->stream == NULL)
+    {
+        free(str);
+        free(request);
+        release_byte_stream(response->stream);
+        free(response);
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    request->elements = get_byte_stream_elements(request->stream);
+    if (request->elements == NULL)
+    {
+        // do not call free on the basis of str as the owner of the string is request->stream
+        release_byte_stream(request->stream);
+        release_byte_stream(response->stream);
+        free(request);
+        free(response);
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    // ***ACTION_NAME*** is reserved for setting up action name within the commond layer
+    // this has to be documented so that the user of commond layer does not send a data
+    // element with name as a ***ACTION_NAME***
+
+    request->action_name = tcp_action_request_get_string(request, "***ACTION_NAME***");
+    if (request->action_name == NULL)
+    {
+        release_byte_stream_elements(request->elements); // this we have to check it once
+        release_byte_stream(request->stream); 
+        release_byte_stream(response->stream);
+        free(request);
+        free(response);
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    action_handler = NULL;
+    for (i = 0; i < request->server->action_handlers_count; i++)
+    {
+        if (strcmp(request->server->action_handlers[i]->name, request->action_name))
+        {
+            action_handler = request->server->action_handlers[i];
+            break;
+        }
+    }
+
+    if (action_handler == NULL)
+    {
+        free(request->action_name);
+        release_byte_stream_elements(request->elements); // this we have to check it once
+        release_byte_stream(request->stream);
+        release_byte_stream(response->stream);
+        free(request);
+        free(response);
+        disconnect_tcp_client(client);
+        release_tcp_client(client);
+        return;
+    }
+
+    action_handler->action_handler(request, response);
+    // is everything work as desired , we will be adding some code over here to
+    // check if the connection to the client has been closed or not
+    // if not then we will again make sure that we are supposed to recieve more data
+
+    // to release request and response will be the responsibitlity of commond layer user
+    // by placing call to release_tcp_action_request and release_tcp_action_response
 }
 
 void start_tcp_action_server(tcp_action_server *action_server)
@@ -112,7 +310,37 @@ void stop_tcp_action_server(tcp_action_server *action_server)
         return;
     tcp_stop_server(action_server->server);
 }
-void release_tcp_action_server(tcp_action_server *action_server) {}
+void release_tcp_action_server(tcp_action_server *action_server)
+{
+    int i;
+
+    if (action_server == NULL)
+        return;
+
+    if (action_server->server == NULL)
+        return;
+
+    release_tcp_server(action_server->server);
+
+    global_action_server = NULL; // this will change when support for enabling multiple server is added
+    action_server->server = NULL;
+    if (action_server->error_number == 601 && action_server->error_string != NULL)
+    {
+        free(action_server->error_string);
+        action_server->error_string = NULL;
+    }
+
+    if (action_server->action_handlers == NULL)
+        return;
+
+    for (i = 0; i < action_server->action_handlers_count; i++)
+    {
+        free(action_server->action_handlers[i]->name);
+        free(action_server->action_handlers[i]);
+    }
+    free(action_server->action_handlers);
+    free(action_server);
+}
 
 int tcp_action_server_failed(tcp_action_server *action_server)
 {
