@@ -4,29 +4,142 @@
 #include <stdint.h>
 #include <sscl.h>
 #include <pthread.h>
+#include <clencoder.h>
+#include <ssnl.h>
+
+struct _tcp_action_handler;
 
 typedef struct _tcp_action_server
 {
+    tcp_server *server;
+    int error_number;
+    char *error_string;
+    struct _tcp_action_handler **action_handlers;
+    uint32_t action_handlers_count;
 } tcp_action_server;
+
 typedef struct _tcp_action_request
 {
+    tcp_client *client;
+    tcp_action_server *server;
+    char *action_name;
+    int error_number;
+    char *error_string;
+    byte_stream *stream;
+    byte_stream_elements *elements;
 } tcp_action_request;
+
 typedef struct _tcp_action_response
 {
+    tcp_client *client;
+    int error_number;
+    char *error_string;
+    byte_stream *stream;
 } tcp_action_response;
 
-tcp_action_server *allocate_tcp_action_server(unsigned short int port) {}
-void on_tcp_action_server_started(tcp_action_server *server, void (*handler)(unsigned short int)) {}
-void on_tcp_action_server_stopped(tcp_action_server *server, void (*handler)(unsigned short int)) {}
-void tcp_action_server_add_action_mapping(tcp_action_server *server, const char *commond, void (*action)(tcp_action_request *, tcp_action_response *)) {}
+typedef struct _tcp_action_handler
+{
+    char *name;
+    void (*action_handler)(tcp_action_request *, tcp_action_response *);
 
-void start_tcp_action_server(tcp_action_server *server) {}
+} tcp_action_handler;
 
-void stop_tcp_action_server(tcp_action_server *server) {}
-void release_tcp_action_server(tcp_action_server *server) {}
+tcp_action_server *allocate_tcp_action_server(unsigned short int port)
+{
+    tcp_action_server *action_server;
+    action_server = (tcp_action_server *)malloc(sizeof(tcp_action_server));
+    if (action_server == NULL)
+        return NULL;
+    action_server->server = NULL;
+    action_server->error_number = 0;
+    action_server->error_string = NULL;
+    action_server->action_handlers = NULL;
+    action_server->action_handlers_count = 0;
 
-int tcp_action_server_failed(tcp_action_server *server) {}
-void tcp_action_server_error(tcp_action_server *server, char **ptr) {}
+    action_server->server = allocate_tcp_server(port);
+    if (tcp_server_failed(action_server->server))
+    {
+        action_server->error_number = 601; //  the source of error is not on commond layer
+                                           // the source is on the underlying layer
+        tcp_server_error(action_server->server, &(action_server->error_string));
+    }
+
+    return action_server;
+}
+
+void on_tcp_action_server_started(tcp_action_server *action_server, void (*handler)(unsigned short int))
+{
+    if (action_server == NULL || handler == NULL)
+        return;
+    on_tcp_server_started(action_server->server, handler);
+}
+
+void on_tcp_action_server_stopped(tcp_action_server *action_server, void (*handler)(unsigned short int))
+{
+    if (action_server == NULL || handler == NULL)
+        return;
+
+    on_tcp_server_stoppped(action_server->server, handler);
+}
+
+void tcp_action_server_add_action_mapping(tcp_action_server *action_server, const char *commond, void (*action)(tcp_action_request *, tcp_action_response *)) {}
+
+void action_client_connected_handler(unsigned short int port, tcp_server *server, tcp_client *client)
+{
+    // over here we will extract request bytes from tcp_client
+    // then we will create byte_stream from it
+    // then we will extract action name from it
+    // over here we will traverse the action handlers data structure
+    // and look for action name and call appropriate action handler function
+}
+
+void start_tcp_action_server(tcp_action_server *action_server)
+{
+    if (action_server == NULL)
+        return;
+    on_tcp_client_connected(action_server->server, action_client_connected_handler);
+    tcp_start_server(action_server->server);
+    if (tcp_server_failed(action_server->server))
+    {
+        action_server->error_number = 601;
+        tcp_server_error(action_server->server, &(action_server->error_string));
+    }
+}
+
+void stop_tcp_action_server(tcp_action_server *action_server)
+{
+    if (action_server == NULL)
+        return;
+    tcp_stop_server(action_server->server);
+}
+void release_tcp_action_server(tcp_action_server *action_server) {}
+
+int tcp_action_server_failed(tcp_action_server *action_server)
+{
+    if (action_server == NULL || action_server->error_number != 0)
+        return 1; // yes something failed
+    return 0;     // 0 for false
+}
+
+void tcp_action_server_error(tcp_action_server *action_server, char **error_string)
+{
+    if (action_server->server == NULL || error_string == NULL)
+        return;
+    if (action_server->server == 0)
+    {
+        *error_string = NULL;
+        return;
+    }
+    if (action_server->error_number == 601)
+    {
+        *error_string = action_server->error_string;
+        action_server->error_string = NULL;
+    }
+    else
+    {
+        *error_string = NULL; // ideally this should not happen
+    }
+}
 
 char *tcp_action_request_get_action_name(tcp_action_request *request) {}
 char *tcp_action_request_get_local_ip(tcp_action_request *request) {}
