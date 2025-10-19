@@ -272,7 +272,7 @@ void action_client_connected_handler(unsigned short int port, tcp_server *server
     if (action_handler == NULL)
     {
         free(request->action_name);
-        release_byte_stream_elements(request->elements); // this we have to check it once
+        release_byte_stream_elements(request->elements);
         release_byte_stream(request->stream);
         release_byte_stream(response->stream);
         free(request);
@@ -353,9 +353,10 @@ int tcp_action_server_failed(tcp_action_server *action_server)
 void tcp_action_server_error(tcp_action_server *action_server, char **error_string)
 {
     char *error600 = "Low Memory";
-    if (action_server->server == NULL || error_string == NULL)
+
+    if (action_server == NULL || action_server->server == NULL || error_string == NULL)
         return;
-    if (action_server->server == 0)
+    if (action_server->error_number == 0)
     {
         *error_string = NULL;
         return;
@@ -367,7 +368,7 @@ void tcp_action_server_error(tcp_action_server *action_server, char **error_stri
     }
     else if (action_server->error_number == 600)
     {
-        *error_string = (char *)malloc(strlen(error600) + 1);
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error600) + 1));
         if (*error_string != NULL)
         {
             strcpy(*error_string, error600);
@@ -1178,34 +1179,431 @@ long double tcp_action_request_get_long_double(tcp_action_request *request, cons
     }
 }
 
-void tcp_action_response_set_string(tcp_action_response *response, const char *name, const char *value) {}
-void tcp_action_response_set_char(tcp_action_response *response, const char *name, char value) {}
-void tcp_action_response_set_int8(tcp_action_response *response, const char *name, int8_t value) {}
-void tcp_action_response_set_int16(tcp_action_response *response, const char *name, int16_t value) {}
-void tcp_action_response_set_int32(tcp_action_response *response, const char *name, int32_t value) {}
-void tcp_action_response_set_int64(tcp_action_response *response, const char *name, int64_t value) {}
-void tcp_action_response_set_uint8(tcp_action_response *response, const char *name, uint8_t value) {}
-void tcp_action_response_set_uint16(tcp_action_response *response, const char *name, uint16_t value) {}
-void tcp_action_response_set_uint32(tcp_action_response *response, const char *name, uint32_t value) {}
-void tcp_action_response_set_uint64(tcp_action_response *response, const char *name, uint64_t value) {}
-void tcp_action_response_set_float(tcp_action_response *response, const char *name, float value) {}
-void tcp_action_response_set_double(tcp_action_response *response, const char *name, double value) {}
-void tcp_action_response_set_long_double(tcp_action_response *response, const char *name, long double value) {}
+void tcp_action_response_set_string(tcp_action_response *response, const char *name, const char *value)
+{
+    int result;
+    if (response == NULL || name == NULL || value == NULL || *name == '\0')
+        return;
 
-void send_tcp_action_response(tcp_action_response *response) {}
+    result = add_string_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
 
-void tcp_action_request_close(tcp_action_request *request) {}
-void release_tcp_action_request(tcp_action_request *request) {}
+void tcp_action_response_set_char(tcp_action_response *response, const char *name, char value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
 
-int tcp_action_request_failed(tcp_action_request *request) {}
-void tcp_action_request_error(tcp_action_request *request, char **ptr) {}
+    result = add_char_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
 
-void release_tcp_action_response(tcp_action_response *response) {}
+void tcp_action_response_set_int8(tcp_action_response *response, const char *name, int8_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
 
-int tcp_action_response_failed(tcp_action_response *response) {}
-void tcp_action_response_error(tcp_action_response *response, char **ptr) {}
+    result = add_int8_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
 
-tcp_action_server *get_tcp_action_server(tcp_action_request *request) {}
+void tcp_action_response_set_int16(tcp_action_response *response, const char *name, int16_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int16_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_int32(tcp_action_response *response, const char *name, int32_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int32_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_int64(tcp_action_response *response, const char *name, int64_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int64_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_uint8(tcp_action_response *response, const char *name, uint8_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint8_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_uint16(tcp_action_response *response, const char *name, uint16_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint16_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_uint32(tcp_action_response *response, const char *name, uint32_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint32_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_uint64(tcp_action_response *response, const char *name, uint64_t value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint64_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_float(tcp_action_response *response, const char *name, float value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_float_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_double(tcp_action_response *response, const char *name, double value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_double_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void tcp_action_response_set_long_double(tcp_action_response *response, const char *name, long double value)
+{
+    int result;
+    if (response == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_long_double_to_byte_stream(response->stream, name, value);
+    if (!result)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 600; // Low memory
+    }
+}
+
+void send_tcp_action_response(tcp_action_response *response)
+{
+    char *str;
+    uint32_t str_len;
+    if (response == NULL)
+        return;
+
+    str = get_byte_stream_bytes(response->stream);
+    if (str == NULL)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 604; // Empty Response
+        return;
+    }
+
+    str_len = get_byte_stream_length(response->stream);
+    if (str_len == 0)
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 604; // Empty Response
+        return;
+    }
+
+    tcp_client_send(response->client, str, str_len);
+    if (tcp_client_failed(response->client))
+    {
+        if (response->error_number == 601 || response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 601;
+        tcp_client_error(response->client, &(response->error_string));
+    }
+}
+
+void tcp_action_request_close(tcp_action_request *request)
+{
+    if (request == NULL)
+        return;
+    disconnect_tcp_client(request->client);
+    release_tcp_client(request->client);
+}
+
+void release_tcp_action_request(tcp_action_request *request)
+{
+    if (request == NULL)
+        return;
+
+    if (request->action_name)
+        free(request->action_name);
+
+    if (request->error_number == 601 && request->error_string != NULL)
+    {
+        free(request->error_string);
+    }
+
+    release_byte_stream_elements(request->elements);
+    release_byte_stream(request->stream);
+    free(request);
+}
+
+int tcp_action_request_failed(tcp_action_request *request)
+{
+    if (request == NULL || request->error_number != 0)
+        return 1; // yes
+    return 0;     // no
+}
+
+void tcp_action_request_error(tcp_action_request *request, char **error_string)
+{
+    char *error600 = "Low Memory";
+    char *error602 = "Name not present in request ";
+    char *error603 = "Type not as desired in request";
+
+    if (request == NULL || error_string == NULL)
+        return;
+    if (request->error_number == 0)
+    {
+        *error_string = NULL;
+        return;
+    }
+    if (request->error_number == 601)
+    {
+        *error_string = request->error_string;
+        request->error_string = NULL;
+    }
+    else if (request->error_number == 600)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error600) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error600);
+        }
+    }
+    else if (request->error_number == 602)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error602) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error602);
+        }
+    }
+    else if (request->error_number == 603)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error603) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error603);
+        }
+    }
+    else
+    {
+        *error_string = NULL; // ideally this should not happen
+    }
+}
+
+void release_tcp_action_response(tcp_action_response *response)
+{
+    if (response == NULL)
+        return;
+    if (response->error_number == 601 && response->error_string != NULL)
+    {
+        free(response->error_string);
+    }
+
+    release_byte_stream(response->stream);
+    free(response);
+}
+
+int tcp_action_response_failed(tcp_action_response *response)
+{
+    if (response == NULL || response->error_number != 0)
+        return 1; // yes
+    return 0;     // no
+}
+
+void tcp_action_response_error(tcp_action_response *response, char **error_string)
+{
+    char *error600 = "Low Memory";
+    char *error604  = "Response is Empty";
+
+    if (response == NULL || error_string == NULL)
+        return;
+    if (response->error_number == 0)
+    {
+        *error_string = NULL;
+        return;
+    }
+    if (response->error_number == 601)
+    {
+        *error_string = response->error_string;
+        response->error_string = NULL;
+    }
+    else if (response->error_number == 600)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error600) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error600);
+        }
+    }
+    else if (response->error_number == 604)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error604) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error604);
+        }
+    }
+    else
+    {
+        *error_string = NULL; // ideally this should not happen
+    }
+}
+
+tcp_action_server *get_tcp_action_server(tcp_action_request *request)
+{
+    if (request == NULL)
+        return NULL;
+
+    return request->server;
+}
 
 // commond layer function implementation end over here
 // the following code will be for sample application
