@@ -250,7 +250,7 @@ void action_client_connected_handler(unsigned short int port, tcp_server *server
     if (request->action_name == NULL)
     {
         release_byte_stream_elements(request->elements); // this we have to check it once
-        release_byte_stream(request->stream); 
+        release_byte_stream(request->stream);
         release_byte_stream(response->stream);
         free(request);
         free(response);
@@ -310,6 +310,7 @@ void stop_tcp_action_server(tcp_action_server *action_server)
         return;
     tcp_stop_server(action_server->server);
 }
+
 void release_tcp_action_server(tcp_action_server *action_server)
 {
     int i;
@@ -351,6 +352,7 @@ int tcp_action_server_failed(tcp_action_server *action_server)
 
 void tcp_action_server_error(tcp_action_server *action_server, char **error_string)
 {
+    char *error600 = "Low Memory";
     if (action_server->server == NULL || error_string == NULL)
         return;
     if (action_server->server == 0)
@@ -363,32 +365,818 @@ void tcp_action_server_error(tcp_action_server *action_server, char **error_stri
         *error_string = action_server->error_string;
         action_server->error_string = NULL;
     }
+    else if (action_server->error_number == 600)
+    {
+        *error_string = (char *)malloc(strlen(error600) + 1);
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error600);
+        }
+    }
     else
     {
         *error_string = NULL; // ideally this should not happen
     }
 }
 
-char *tcp_action_request_get_action_name(tcp_action_request *request) {}
-char *tcp_action_request_get_local_ip(tcp_action_request *request) {}
-char *tcp_action_request_get_remote_ip(tcp_action_request *request) {}
-unsigned short int tcp_action_request_get_local_port(tcp_action_request *request) {}
-unsigned short int tcp_action_request_get_remote_port(tcp_action_request *request) {}
+char *tcp_action_request_get_action_name(tcp_action_request *request)
+{
+    char *action_name;
 
-int tcp_action_request_name_exists(tcp_action_request *request, const char *name) {}
-char *tcp_action_request_get_string(tcp_action_request *request, const char *name) {}
-char tcp_action_request_get_char(tcp_action_request *request, const char *name) {}
-int8_t tcp_action_request_get_int8(tcp_action_request *request, const char *name) {}
-int16_t tcp_action_request_get_int16(tcp_action_request *request, const char *name) {}
-int32_t tcp_action_request_get_int32(tcp_action_request *request, const char *name) {}
-int64_t tcp_action_request_get_int64(tcp_action_request *request, const char *name) {}
-uint8_t tcp_action_request_get_uint8(tcp_action_request *request, const char *name) {}
-uint16_t tcp_action_request_get_uint16(tcp_action_request *request, const char *name) {}
-uint32_t tcp_action_request_get_uint32(tcp_action_request *request, const char *name) {}
-uint64_t tcp_action_request_get_uint64(tcp_action_request *request, const char *name) {}
-float tcp_action_request_get_float(tcp_action_request *request, const char *name) {}
-double tcp_action_request_get_double(tcp_action_request *request, const char *name) {}
-long double tcp_action_request_get_long_double(tcp_action_request *request, const char *name) {}
+    if (request == NULL || request->action_name == NULL)
+        return NULL;
+
+    action_name = (char *)malloc(sizeof(request->action_name) + 1);
+    if (action_name == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return NULL;
+    }
+
+    strcpy(action_name, request->action_name);
+    return action_name;
+}
+
+char *tcp_action_request_get_local_ip(tcp_action_request *request)
+{
+    char *local_ip;
+
+    if (request == NULL)
+        return NULL;
+
+    local_ip = tcp_client_get_local_ip(request->client);
+    if (tcp_client_failed(request->client))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+
+        tcp_client_error(request->client, &(request->error_string));
+        return NULL;
+    }
+    return local_ip;
+}
+
+char *tcp_action_request_get_remote_ip(tcp_action_request *request)
+{
+
+    char *remote_ip;
+
+    if (request == NULL)
+        return NULL;
+
+    remote_ip = tcp_client_get_remote_ip(request->client);
+    if (tcp_client_failed(request->client))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+
+        tcp_client_error(request->client, &(request->error_string));
+        return NULL;
+    }
+    return remote_ip;
+}
+
+unsigned short int tcp_action_request_get_local_port(tcp_action_request *request)
+{
+    unsigned short int local_port;
+
+    if (request == NULL)
+        return 0;
+
+    local_port = tcp_client_get_local_port(request->client);
+    if (tcp_client_failed(request->client))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+
+        tcp_client_error(request->client, &(request->error_string));
+        return 0;
+    }
+    return local_port;
+}
+
+unsigned short int tcp_action_request_get_remote_port(tcp_action_request *request)
+{
+    unsigned short int remote_port;
+
+    if (request == NULL)
+        return 0;
+
+    remote_port = tcp_client_get_remote_port(request->client);
+    if (tcp_client_failed(request->client))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+
+        tcp_client_error(request->client, &(request->error_string));
+        return 0;
+    }
+    return remote_port;
+}
+
+int tcp_action_request_name_exists(tcp_action_request *request, const char *name)
+{
+    uint32_t i;
+    byte_stream_element *element;
+    int found;
+    uint32_t elements_count;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0; // for false / failure
+
+    elements_count = get_byte_stream_elements_count(request->stream);
+    found = 0;
+    for (i = 0; i < elements_count; i++)
+    {
+        element = get_byte_stream_element(request->elements, i);
+        if (element != NULL)
+        {
+            if (is_get_byte_stream_element_name(element, name))
+            {
+                found = 1;
+                release_byte_stream_element(element);
+                break;
+            }
+            release_byte_stream_element(element);
+        }
+    }
+    return found;
+}
+
+// internal utility method , hence prototype not added to header file
+byte_stream_element *get_tcp_action_request_byte_stream_element_by_name(tcp_action_request *request, const char *name)
+{
+    byte_stream_element *element;
+    uint32_t i, elements_count;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return NULL;
+
+    elements_count = get_byte_stream_elements_count(request->stream);
+    for (i = 0; i < elements_count; i++)
+    {
+        element = get_byte_stream_element(request->elements, i);
+        if (is_get_byte_stream_element_name(element, name))
+        {
+            break;
+        }
+        release_byte_stream_element(element);
+        element = NULL;
+    }
+    return element;
+}
+
+char *tcp_action_request_get_string(tcp_action_request *request, const char *name)
+{
+    char *value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return NULL;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = NULL;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_string(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_string(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return NULL;
+    }
+}
+
+char tcp_action_request_get_char(tcp_action_request *request, const char *name)
+{
+    char value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return (char)0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = (char)0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_char(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return (char)0;
+    }
+
+    if (get_byte_stream_element_char(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return (char)0;
+    }
+}
+int8_t tcp_action_request_get_int8(tcp_action_request *request, const char *name)
+{
+    int8_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int8(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int8(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+int16_t tcp_action_request_get_int16(tcp_action_request *request, const char *name)
+{
+    int16_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int16(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int16(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+int32_t tcp_action_request_get_int32(tcp_action_request *request, const char *name)
+{
+    int32_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int32(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int32(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+int64_t tcp_action_request_get_int64(tcp_action_request *request, const char *name)
+{
+    int64_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int64(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int64(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+uint8_t tcp_action_request_get_uint8(tcp_action_request *request, const char *name)
+{
+    uint8_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint8(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint8(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+uint16_t tcp_action_request_get_uint16(tcp_action_request *request, const char *name)
+{
+    uint16_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint16(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint16(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+uint32_t tcp_action_request_get_uint32(tcp_action_request *request, const char *name)
+{
+    uint32_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint32(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint32(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+uint64_t tcp_action_request_get_uint64(tcp_action_request *request, const char *name)
+{
+    uint64_t value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint64(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint64(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0;
+    }
+}
+
+float tcp_action_request_get_float(tcp_action_request *request, const char *name)
+{
+    float value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0.0f;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0.0f;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_float(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_float(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0.0f;
+    }
+}
+
+double tcp_action_request_get_double(tcp_action_request *request, const char *name)
+{
+    double value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0.0;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0.0;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_double(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_double(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0.0;
+    }
+}
+
+long double tcp_action_request_get_long_double(tcp_action_request *request, const char *name)
+{
+    long double value;
+    byte_stream_element *element;
+
+    if (request == NULL || name == NULL || *name == '\0' || request->elements == NULL)
+        return 0.0L;
+
+    element = get_tcp_action_request_byte_stream_element_by_name(request, name);
+    value = 0.0L;
+
+    if (element == NULL)
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 602; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_long_double(element))
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 603; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_long_double(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (request->error_number == 601 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 600;
+        return 0.0L;
+    }
+}
 
 void tcp_action_response_set_string(tcp_action_response *response, const char *name, const char *value) {}
 void tcp_action_response_set_char(tcp_action_response *response, const char *name, char value) {}
@@ -419,6 +1207,7 @@ void tcp_action_response_error(tcp_action_response *response, char **ptr) {}
 
 tcp_action_server *get_tcp_action_server(tcp_action_request *request) {}
 
+// commond layer function implementation end over here
 // the following code will be for sample application
 
 void server_started_event_handler(unsigned short int port)
