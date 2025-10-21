@@ -1182,7 +1182,7 @@ long double tcp_action_request_get_long_double(tcp_action_request *request, cons
 void tcp_action_response_set_string(tcp_action_response *response, const char *name, const char *value)
 {
     int result;
-    if (response == NULL || name == NULL || value == NULL || *name == '\0')
+    if (response == NULL || name == NULL || value == NULL || *name == '\0' || *value == '\0')
         return;
 
     result = add_string_to_byte_stream(response->stream, name, value);
@@ -1561,7 +1561,7 @@ int tcp_action_response_failed(tcp_action_response *response)
 void tcp_action_response_error(tcp_action_response *response, char **error_string)
 {
     char *error600 = "Low Memory";
-    char *error604  = "Response is Empty";
+    char *error604 = "Response is Empty";
 
     if (response == NULL || error_string == NULL)
         return;
