@@ -4,52 +4,474 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <clencoder.h>
+#include <csnl.h>
 
 #include <_stdio.h>
 
 typedef struct _tcp_connection_request
 {
-
+    byte_stream *stream;
+    int error_number;
+    char *error_string;
+    char *action_name;
 } tcp_connection_request;
 
 typedef struct _tcp_connection_response
 {
-
+    int error_number;
+    char *error_string;
+    byte_stream *stream;
+    byte_stream_elements *elements;
 } tcp_connection_response;
 
 void tcp_connection_send_request(tcp_connection *connection, tcp_connection_request *request)
 {
+    char *str;
+    uint32_t str_len;
+
+    if (connection == NULL || request == NULL)
+        return;
+
+    if (request->action_name == NULL)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 505; // Action name not set
+        return;
+    }
+
+    str = get_byte_stream_bytes(request->stream);
+    if (str == NULL)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 504; // Request Empty
+        return;
+    }
+
+    str_len = get_byte_stream_length(request->stream);
+    if (str_len == 0)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 504; // Request Empty
+        return;
+    }
+
+    tcp_connection_send(connection, str, str_len);
+    if (tcp_connection_failed(connection))
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 501;
+        tcp_connection_error(connection, &(request->error_string));
+    }
 }
 
 tcp_connection_response *tcp_connection_receive_response(tcp_connection *connection)
 {
+    tcp_connection_response *response;
+    char *str;
+    uint32_t str_len;
+
+    if (connection == NULL)
+        return NULL;
+
+    response = (tcp_connection_response *)malloc(sizeof(tcp_connection_response));
+    if (response == NULL)
+        return NULL;
+
+    response->elements = NULL;
+    response->error_number = 0;
+    response->error_string = NULL;
+    response->stream = NULL;
+
+    str = tcp_connection_receive(connection, &str_len);
+    if (tcp_connection_failed(connection))
+    {
+        response->error_number = 501;
+        tcp_connection_error(connection, &(response->error_string));
+        return response;
+    }
+
+    response->stream = create_byte_stream_from_bytes(str, str_len);
+    if (response->stream == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500; //  Low memory
+        return response;
+    }
+
+    response->elements = get_byte_stream_elements(response->stream);
+    if (response->elements == NULL)
+    {
+        release_byte_stream(response->stream);
+        response->stream = NULL;
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500; //  Low memory
+        return response;
+    }
+
+    return response;
 }
 
 // will document later on
 tcp_connection_request *create_tcp_connection_request(tcp_connection *connection)
 {
+    tcp_connection_request *request;
+
+    if (connection == NULL)
+        return NULL;
+
+    request = (tcp_connection_request *)malloc(sizeof(tcp_connection_request));
+    if (request == NULL)
+        return NULL;
+
+    request->error_number = 0;
+    request->error_string = NULL;
+    request->stream = create_byte_stream();
+    if (request->stream == NULL)
+    {
+        request->error_number = 500;
+        return request;
+    }
+    request->action_name = NULL;
+    return request;
 }
 
 void tcp_connection_request_set_action_name(tcp_connection_request *request, const char *action)
 {
-}
-char *tcp_connection_request_get_action_name(tcp_connection_request *request)
-{
+    int result;
+    if (request == NULL || action == NULL || *action == '\0')
+        return;
+
+    if (request->action_name != NULL)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 506;
+        return;
+    }
+
+    request->action_name = (char *)malloc(sizeof(char) * (strlen(action) + 1));
+    if (request->action_name == NULL)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+        return;
+    }
+    strcpy(request->action_name, action);
+    result = add_string_to_byte_stream(request->stream, "***ACTION_NAME***", request->action_name);
+    if (!result)
+    {
+        free(request->action_name);
+        request->action_name = NULL;
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+        return;
+    }
 }
 
-void tcp_connection_request_set_string(tcp_connection_request *request, const char *name, const char *value) {}
-void tcp_connection_request_set_char(tcp_connection_request *request, const char *name, char value) {}
-void tcp_connection_request_set_int8(tcp_connection_request *request, const char *name, int8_t value) {}
-void tcp_connection_request_set_int16(tcp_connection_request *request, const char *name, int16_t value) {}
-void tcp_connection_request_set_int32(tcp_connection_request *request, const char *name, int32_t value) {}
-void tcp_connection_request_set_int64(tcp_connection_request *request, const char *name, int64_t value) {}
-void tcp_connection_request_set_uint8(tcp_connection_request *request, const char *name, uint8_t value) {}
-void tcp_connection_request_set_uint16(tcp_connection_request *request, const char *name, uint16_t value) {}
-void tcp_connection_request_set_uint32(tcp_connection_request *request, const char *name, uint32_t value) {}
-void tcp_connection_request_set_uint64(tcp_connection_request *request, const char *name, uint64_t value) {}
-void tcp_connection_request_set_float(tcp_connection_request *request, const char *name, float value) {}
-void tcp_connection_request_set_double(tcp_connection_request *request, const char *name, double value) {}
-void tcp_connection_request_set_long_double(tcp_connection_request *request, const char *name, long double value) {}
+char *tcp_connection_request_get_action_name(tcp_connection_request *request)
+{
+    char *str;
+
+    if (request == NULL || request->action_name == NULL)
+        return NULL;
+
+    str = (char *)malloc(sizeof(char) * (strlen(request->action_name) + 1));
+    if (str == NULL)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+        return NULL;
+    }
+
+    strcpy(str, request->action_name);
+    return str;
+}
+
+void tcp_connection_request_set_string(tcp_connection_request *request, const char *name, const char *value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || value == NULL || *name == '\0' || *value == '\0')
+        return;
+
+    result = add_string_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+void tcp_connection_request_set_char(tcp_connection_request *request, const char *name, char value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_char_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_int8(tcp_connection_request *request, const char *name, int8_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int8_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_int16(tcp_connection_request *request, const char *name, int16_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int16_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_int32(tcp_connection_request *request, const char *name, int32_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int32_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_int64(tcp_connection_request *request, const char *name, int64_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_int64_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_uint8(tcp_connection_request *request, const char *name, uint8_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint8_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_uint16(tcp_connection_request *request, const char *name, uint16_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint16_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_uint32(tcp_connection_request *request, const char *name, uint32_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint32_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_uint64(tcp_connection_request *request, const char *name, uint64_t value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_uint64_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_float(tcp_connection_request *request, const char *name, float value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_float_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_double(tcp_connection_request *request, const char *name, double value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_double_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
+
+void tcp_connection_request_set_long_double(tcp_connection_request *request, const char *name, long double value)
+{
+    int result;
+
+    if (request == NULL || name == NULL || *name == '\0')
+        return;
+
+    result = add_long_double_to_byte_stream(request->stream, name, value);
+    if (!result)
+    {
+        if (request->error_number == 501 && request->error_string != NULL)
+        {
+            free(request->error_string);
+            request->error_string = NULL;
+        }
+        request->error_number = 500;
+    }
+}
 
 int tcp_connection_response_name_exists(tcp_connection_response *response, const char *name) {}
 char *tcp_connection_response_get_string(tcp_connection_response *response, const char *name) {}
