@@ -473,30 +473,846 @@ void tcp_connection_request_set_long_double(tcp_connection_request *request, con
     }
 }
 
-int tcp_connection_response_name_exists(tcp_connection_response *response, const char *name) {}
-char *tcp_connection_response_get_string(tcp_connection_response *response, const char *name) {}
-char tcp_connection_response_get_char(tcp_connection_response *response, const char *name) {}
-int8_t tcp_connection_response_get_int8(tcp_connection_response *response, const char *name) {}
-int16_t tcp_connection_response_get_int16(tcp_connection_response *response, const char *name) {}
-int32_t tcp_connection_response_get_int32(tcp_connection_response *response, const char *name) {}
-int64_t tcp_connection_response_get_int64(tcp_connection_response *response, const char *name) {}
-uint8_t tcp_connection_response_get_uint8(tcp_connection_response *response, const char *name) {}
-uint16_t tcp_connection_response_get_uint16(tcp_connection_response *response, const char *name) {}
-uint32_t tcp_connection_response_get_uint32(tcp_connection_response *response, const char *name) {}
-uint64_t tcp_connection_response_get_uint64(tcp_connection_response *response, const char *name) {}
-float tcp_connection_response_get_float(tcp_connection_response *response, const char *name) {}
-double tcp_connection_response_get_double(tcp_connection_response *response, const char *name) {}
-long double tcp_connection_response_get_long_double(tcp_connection_response *response, const char *name) {}
+int tcp_connection_response_name_exists(tcp_connection_response *response, const char *name)
+{
+    uint32_t i;
+    byte_stream_element *element;
+    int found;
+    uint32_t elements_count;
 
-void release_tcp_connection_request(tcp_connection_request *request) {}
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0; // for false / failure
 
-int tcp_connection_request_failed(tcp_connection_request *request) {}
-void tcp_connection_request_error(tcp_connection_request *request, char **ptr) {}
+    elements_count = get_byte_stream_elements_count(response->stream);
+    found = 0;
+    for (i = 0; i < elements_count; i++)
+    {
+        element = get_byte_stream_element(response->elements, i);
+        if (element != NULL)
+        {
+            if (is_get_byte_stream_element_name(element, name))
+            {
+                found = 1;
+                release_byte_stream_element(element);
+                break;
+            }
+            release_byte_stream_element(element);
+        }
+    }
+    return found;
+}
 
-void release_tcp_connection_response(tcp_connection_response *response) {}
+// internal utility method , hence prototype not added to header file
+byte_stream_element *get_tcp_connection_response_byte_stream_element_by_name(tcp_connection_response *response, const char *name)
+{
+    byte_stream_element *element;
+    uint32_t i, elements_count;
 
-int tcp_connection_response_failed(tcp_connection_response *response) {}
-void tcp_connection_response_error(tcp_connection_response *response, char **ptr) {}
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return NULL;
+
+    elements_count = get_byte_stream_elements_count(response->stream);
+    for (i = 0; i < elements_count; i++)
+    {
+        element = get_byte_stream_element(response->elements, i);
+        if (is_get_byte_stream_element_name(element, name))
+        {
+            break;
+        }
+        release_byte_stream_element(element);
+        element = NULL;
+    }
+    return element;
+}
+
+char *tcp_connection_response_get_string(tcp_connection_response *response, const char *name)
+{
+    char *value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return NULL;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = NULL;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_string(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_string(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return NULL;
+    }
+}
+
+char tcp_connection_response_get_char(tcp_connection_response *response, const char *name)
+{
+    char value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return (char)0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = (char)0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_char(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_char(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return (char)0;
+    }
+}
+
+int8_t tcp_connection_response_get_int8(tcp_connection_response *response, const char *name)
+{
+    int8_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int8(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int8(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+int16_t tcp_connection_response_get_int16(tcp_connection_response *response, const char *name)
+{
+    int16_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int16(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int16(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+int32_t tcp_connection_response_get_int32(tcp_connection_response *response, const char *name)
+{
+    int32_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int32(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int32(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+int64_t tcp_connection_response_get_int64(tcp_connection_response *response, const char *name)
+{
+    int64_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_int64(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_int64(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+uint8_t tcp_connection_response_get_uint8(tcp_connection_response *response, const char *name)
+{
+    uint8_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint8(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint8(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+uint16_t tcp_connection_response_get_uint16(tcp_connection_response *response, const char *name)
+{
+    uint16_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint16(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint16(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+uint32_t tcp_connection_response_get_uint32(tcp_connection_response *response, const char *name)
+{
+    uint32_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint32(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint32(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+uint64_t tcp_connection_response_get_uint64(tcp_connection_response *response, const char *name)
+{
+    uint64_t value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_uint64(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_uint64(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0;
+    }
+}
+
+float tcp_connection_response_get_float(tcp_connection_response *response, const char *name)
+{
+    float value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0.0f;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0.0f;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_float(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_float(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0.0f;
+    }
+}
+
+double tcp_connection_response_get_double(tcp_connection_response *response, const char *name)
+{
+    double value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0.0;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0.0;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_double(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_double(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0.0;
+    }
+}
+
+long double tcp_connection_response_get_long_double(tcp_connection_response *response, const char *name)
+{
+    long double value;
+    byte_stream_element *element;
+
+    if (response == NULL || name == NULL || *name == '\0' || response->elements == NULL)
+        return 0.0L;
+
+    element = get_tcp_connection_response_byte_stream_element_by_name(response, name);
+    value = 0.0L;
+
+    if (element == NULL)
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 502; // name not present
+        return value;
+    }
+
+    if (!is_byte_stream_element_long_double(element))
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 503; // type is not as required
+        return value;
+    }
+
+    if (get_byte_stream_element_long_double(element, &value))
+    {
+        return value;
+    }
+    else
+    {
+        if (response->error_number == 501 && response->error_string != NULL)
+        {
+            free(response->error_string);
+            response->error_string = NULL;
+        }
+        response->error_number = 500;
+        return 0.0L;
+    }
+}
+
+void release_tcp_connection_request(tcp_connection_request *request)
+{
+    if (request == NULL)
+        return;
+
+    release_byte_stream(request->stream);
+    if (request->action_name)
+        free(request->action_name);
+
+    if (request->error_number == 501 && request->error_string != NULL)
+    {
+        free(request->error_string);
+        request->error_string = NULL;
+    }
+
+    free(request);
+}
+
+int tcp_connection_request_failed(tcp_connection_request *request)
+{
+    if (request == NULL || request->error_number != 0)
+        return 1; // yes
+    return 0;     // no
+}
+
+void tcp_connection_request_error(tcp_connection_request *request, char **error_string)
+{
+    char *error500 = "Low Memory";
+    char *error504 = "Request is Empty";
+    char *error505 = "Action name not set";
+    char *error506 = "Action name already set";
+
+    if (request == NULL || error_string == NULL)
+        return;
+    if (request->error_number == 0)
+    {
+        *error_string = NULL;
+        return;
+    }
+    if (request->error_number == 501)
+    {
+        *error_string = request->error_string;
+        request->error_string = NULL;
+    }
+    else if (request->error_number == 500)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error500) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error500);
+        }
+    }
+    else if (request->error_number == 504)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error504) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error504);
+        }
+    }
+    else if (request->error_number == 505)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error505) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error505);
+        }
+    }
+    else if (request->error_number == 506)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error506) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error506);
+        }
+    }
+    else
+    {
+        *error_string = NULL; // ideally this should not happen
+    }
+}
+
+void release_tcp_connection_response(tcp_connection_response *response)
+{
+    if (response == NULL)
+        return;
+
+    release_byte_stream_elements(response->elements);
+    release_byte_stream(response->stream);
+    if (response->error_number == 501 && response->error_string != NULL)
+    {
+        free(response->error_string);
+        response->error_string = NULL;
+    }
+    free(response);
+}
+
+int tcp_connection_response_failed(tcp_connection_response *response)
+{
+    if (response == NULL || response->error_number != 0)
+        return 1; // yes
+    return 0;     // no
+}
+
+void tcp_connection_response_error(tcp_connection_response *response, char **error_string)
+{
+    char *error500 = "Low Memory";
+    char *error502 = "Name not present in response";
+    char *error503 = "Type not as desired in response";
+
+    if (response == NULL || error_string == NULL)
+        return;
+    if (response->error_number == 0)
+    {
+        *error_string = NULL;
+        return;
+    }
+    if (response->error_number == 501)
+    {
+        *error_string = response->error_string;
+        response->error_string = NULL;
+    }
+    else if (response->error_number == 500)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error500) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error500);
+        }
+    }
+    else if (response->error_number == 502)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error502) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error502);
+        }
+    }
+    else if (response->error_number == 503)
+    {
+        *error_string = (char *)malloc(sizeof(char) * (strlen(error503) + 1));
+        if (*error_string != NULL)
+        {
+            strcpy(*error_string, error503);
+        }
+    }
+    else
+    {
+        *error_string = NULL; // ideally this should not happen
+    }
+}
 
 // the following code is written by the commond layer library user frmo client side of an application , it is just a sample code , later on the following will be removed and library from cscl.c created
 
@@ -661,6 +1477,7 @@ void add_student()
 
 void edit_student()
 {
+    
     // ask for roll number
     // connect
     //  prepare request will roll number and action name as GetStudetn
