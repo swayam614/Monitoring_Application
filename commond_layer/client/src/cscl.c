@@ -515,6 +515,8 @@ byte_stream_element *get_tcp_connection_response_byte_stream_element_by_name(tcp
     for (i = 0; i < elements_count; i++)
     {
         element = get_byte_stream_element(response->elements, i);
+        if (element == NULL)
+            continue;
         if (is_get_byte_stream_element_name(element, name))
         {
             break;
@@ -1316,6 +1318,71 @@ void tcp_connection_response_error(tcp_connection_response *response, char **err
 
 // the following code is written by the commond layer library user frmo client side of an application , it is just a sample code , later on the following will be removed and library from cscl.c created
 
+void print_byte_stream(byte_stream *stream)
+{
+    if (!stream)
+        return;
+
+    byte_stream_elements *elements = get_byte_stream_elements(stream);
+    if (!elements)
+        return;
+
+    uint32_t count = get_byte_stream_elements_count(stream);
+    for (uint32_t i = 0; i < count; i++)
+    {
+        byte_stream_element *elem = get_byte_stream_element(elements, i);
+        if (!elem)
+            continue;
+
+        char *name = get_byte_stream_element_name(elem);
+        if (!name)
+            continue;
+
+        printf("Element %u: Name = %s, ", i + 1, name);
+
+        if (is_byte_stream_element_string(elem))
+        {
+            char *val;
+            if (get_byte_stream_element_string(elem, &val))
+            {
+                printf("Type = STRING, Value = %s", val);
+                free(val);
+            }
+        }
+        else if (is_byte_stream_element_char(elem))
+        {
+            char c;
+            if (get_byte_stream_element_char(elem, &c))
+            {
+                printf("Type = CHAR, Value = %c", c);
+            }
+        }
+        else if (is_byte_stream_element_int32(elem))
+        {
+            int32_t val;
+            if (get_byte_stream_element_int32(elem, &val))
+            {
+                printf("Type = INT32, Value = %d", val);
+            }
+        }
+        else if (is_byte_stream_element_uint32(elem))
+        {
+            uint32_t val;
+            if (get_byte_stream_element_uint32(elem, &val))
+            {
+                printf("Type = UINT32, Value = %u", val);
+            }
+        }
+        // Add other types similarly if needed (float, double, int64, etc.)
+        printf("\n");
+
+        release_byte_stream_element(elem);
+        free(name);
+    }
+
+    release_byte_stream_elements(elements);
+}
+
 void add_student()
 {
     uint32_t succeeded;
@@ -1378,7 +1445,6 @@ void add_student()
     request = create_tcp_connection_request(connection);
     if (tcp_connection_request_failed(request))
     {
-
         tcp_connection_request_error(request, &err_str);
         if (err_str)
         {
@@ -1396,8 +1462,8 @@ void add_student()
         return;
     }
 
-    tcp_connection_request_set_action_name(request, "Add Student");
-    tcp_connection_request_set_uint32(request, "Roll Number", rollNumber);
+    tcp_connection_request_set_action_name(request, "AddStudent");
+    tcp_connection_request_set_uint32(request, "RollNumber", rollNumber);
     tcp_connection_request_set_string(request, "Name", name);
     tcp_connection_request_set_char(request, "Gender", gender);
     tcp_connection_request_set_uint32(request, "Age", age);
@@ -1410,7 +1476,7 @@ void add_student()
         tcp_connection_request_error(request, &err_str);
         if (err_str)
         {
-            printf("Unablt to send request : %s\n", err_str);
+            printf("Unable to send request : %s\n", err_str);
             free(err_str);
         }
         else
@@ -1447,7 +1513,7 @@ void add_student()
 
     if (tcp_connection_response_name_exists(response, "succeeded"))
     {
-        succeeded = tcp_connection_response_get_uint32(response, "succeeded");
+        succeeded = tcp_connection_response_get_int32(response, "succeeded");
         if (succeeded)
         {
             printf("Student Added\n");
@@ -1477,7 +1543,7 @@ void add_student()
 
 void edit_student()
 {
-    
+
     // ask for roll number
     // connect
     //  prepare request will roll number and action name as GetStudetn
@@ -1513,17 +1579,149 @@ void delete_student()
 }
 void search_student()
 {
-    // ask for roll number
-    // connect
-    //  prepare request will roll number and action name as GetStudetn
-    // send request and receive response
-    // if succeeded is 0 the print exception and story ends
-    // if succeeded is 1 then
-    //              extract anme , age and gender from response
-    //              print name , age and gender
-    //              receive response and parse the succeeded part as done earlier
-    //      Note : dont forget to disconnect and release resources
+    uint32_t succeeded;
+    unsigned int rollNumber;
+    char *name;
+    uint32_t age;
+    char gender;
+    char m;
+    tcp_connection *connection;
+    char *err_str;
+    tcp_connection_request *request;
+    tcp_connection_response *response;
+
+    printf("Student Master (Search)\n");
+    printf("Enter roll number of the student to search for : ");
+    scanf("%u", &rollNumber);
+    fpurge(stdin);
+
+    connection = tcp_connect("localhost", 6060);
+
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &err_str);
+        if (err_str)
+        {
+            printf("Unable to connect server reason : %s", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to connect server\n");
+        }
+        release_tcp_connection(connection);
+        return;
+    }
+
+    request = create_tcp_connection_request(connection);
+    if (tcp_connection_request_failed(request))
+    {
+        tcp_connection_request_error(request, &err_str);
+        if (err_str)
+        {
+            printf("Unablt to send request : %s\n", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to send request\n");
+        }
+
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_request(request);
+        return;
+    }
+
+    tcp_connection_request_set_action_name(request, "GetStudent");
+    tcp_connection_request_set_uint32(request, "RollNumber", rollNumber);
+
+    tcp_connection_send_request(connection, request);
+    if (tcp_connection_request_failed(request))
+    {
+        tcp_connection_request_error(request, &err_str);
+        if (err_str)
+        {
+            printf("Unable to send request : %s\n", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to send request\n");
+        }
+
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_request(request);
+        return;
+    }
+
+    release_tcp_connection_request(request);
+    // request send , now lets process the response
+
+    response = tcp_connection_receive_response(connection);
+    if (tcp_connection_response_failed(response))
+    {
+        tcp_connection_response_error(response, &err_str);
+        if (err_str)
+        {
+            printf("Unable to receive response , reason : %s\n", err_str);
+        }
+        else
+        {
+            printf("Unable to receive response\n");
+        }
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_response(response);
+        return;
+    }
+
+    if (tcp_connection_response_name_exists(response, "succeeded"))
+    {
+        succeeded = tcp_connection_response_get_int32(response, "succeeded");
+        if (succeeded)
+        {
+            name = tcp_connection_response_get_string(response, "name");
+            gender = tcp_connection_response_get_char(response, "gender");
+            age = tcp_connection_response_get_uint32(response, "age");
+            printf("Name : %s\n", name);
+            if (gender == 'M')
+                printf("Gender : Male\n");
+            if (gender == 'F')
+                printf("Gender : Female\n");
+            printf("Age : %" PRIu32 "\n", age);
+            free(name);
+            printf("Press Enter to continue\n");
+            getchar();
+            fpurge(stdin);
+        }
+        else
+        {
+            err_str = tcp_connection_response_get_string(response, "exception");
+            if (err_str)
+            {
+                printf("Unable to get student , reason : %s\n", err_str);
+                free(err_str);
+                printf("Press Enter to continue\n");
+                getchar();
+                fpurge(stdin);
+            }
+            else
+            {
+                printf("Unable to get student\n");
+            }
+        }
+    }
+    else
+    {
+        printf("Invalid response\n");
+    }
+    disconnect_tcp_connection(connection);
+    release_tcp_connection(connection);
+    release_tcp_connection_response(response);
 }
+
 void display_list_of_student()
 {
     tcp_connection *connection;
@@ -1577,16 +1775,17 @@ void display_list_of_student()
         release_tcp_connection_request(request);
         return;
     }
-    tcp_connection_request_set_action_name(request, "GetAllStudents");
 
+    tcp_connection_request_set_action_name(request, "GetAllStudents");
     tcp_connection_send_request(connection, request);
+
     if (tcp_connection_request_failed(request))
     {
 
         tcp_connection_request_error(request, &error_string);
         if (error_string)
         {
-            printf("Unablt to send request : %s\n", error_string);
+            printf("Unable to send request : %s\n", error_string);
             free(error_string);
         }
         else
@@ -1603,6 +1802,8 @@ void display_list_of_student()
     release_tcp_connection_request(request);
 
     response = tcp_connection_receive_response(connection);
+    // printf("\n");
+    // print_byte_stream(request->stream);
     if (tcp_connection_response_failed(response))
     {
         tcp_connection_response_error(response, &error_string);
@@ -1620,10 +1821,11 @@ void display_list_of_student()
         return;
     }
 
-    succeeded = tcp_connection_response_get_uint32(response, "succeeded");
+    succeeded = tcp_connection_response_get_int32(response, "succeeded");
+    // printf("Correct %d\n", succeeded);
     if (succeeded)
     {
-        number_of_student = tcp_connection_response_get_uint32(response, "number_of_student");
+        number_of_student = tcp_connection_response_get_int32(response, "number_of_student");
         x = 1;
         while (x <= number_of_student)
         {
@@ -1633,20 +1835,25 @@ void display_list_of_student()
             name = tcp_connection_response_get_string(response, field_name);
             sprintf(field_name, "gender_%d", x);
             gender = tcp_connection_response_get_char(response, field_name);
-            sprintf(field_name, "age_ %d", x);
+            sprintf(field_name, "age_%d", x);
             age = tcp_connection_response_get_uint32(response, field_name);
             printf("%d", x);
             printf(",%" PRIu32, roll_number);
             printf(",%s", name);
             printf(",%c", gender);
             printf(",%" PRIu32, age);
+            printf("\n");
             x++;
+        }
+        if (number_of_student == 0)
+        {
+            printf("No student added\n");
         }
     }
     else
     {
         error_string = tcp_connection_response_get_string(response, "exception");
-        printf("Unable to fetch students , reason : %s\n", error_string);
+        printf("Unable to fetch students, reason : %s\n", error_string);
         free(error_string);
     }
 
@@ -1660,7 +1867,7 @@ int main()
     int choice;
     while (1)
     {
-        printf("Student Master\n");
+        printf("\nStudent Master\n");
         printf("----------------------------\n");
         printf("1. Add\n");
         printf("2. Edit\n");
