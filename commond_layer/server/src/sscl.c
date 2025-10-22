@@ -262,7 +262,7 @@ void action_client_connected_handler(unsigned short int port, tcp_server *server
     action_handler = NULL;
     for (i = 0; i < request->server->action_handlers_count; i++)
     {
-        if (strcmp(request->server->action_handlers[i]->name, request->action_name))
+        if (strcmp(request->server->action_handlers[i]->name, request->action_name) == 0)
         {
             action_handler = request->server->action_handlers[i];
             break;
@@ -387,7 +387,7 @@ char *tcp_action_request_get_action_name(tcp_action_request *request)
     if (request == NULL || request->action_name == NULL)
         return NULL;
 
-    action_name = (char *)malloc(sizeof(request->action_name) + 1);
+    action_name = (char *)malloc(strlen(request->action_name) + 1);
     if (action_name == NULL)
     {
         if (request->error_number == 601 && request->error_string != NULL)
@@ -1627,7 +1627,72 @@ struct student
 
 } student;
 
-void add_student_action_hnadler(tcp_action_request *request, tcp_action_response *response)
+void print_byte_stream(byte_stream *stream)
+{
+    if (!stream)
+        return;
+
+    byte_stream_elements *elements = get_byte_stream_elements(stream);
+    if (!elements)
+        return;
+
+    uint32_t count = get_byte_stream_elements_count(stream);
+    for (uint32_t i = 0; i < count; i++)
+    {
+        byte_stream_element *elem = get_byte_stream_element(elements, i);
+        if (!elem)
+            continue;
+
+        char *name = get_byte_stream_element_name(elem);
+        if (!name)
+            continue;
+
+        printf("Element %u: Name = %s, ", i + 1, name);
+
+        if (is_byte_stream_element_string(elem))
+        {
+            char *val;
+            if (get_byte_stream_element_string(elem, &val))
+            {
+                printf("Type = STRING, Value = %s", val);
+                free(val);
+            }
+        }
+        else if (is_byte_stream_element_char(elem))
+        {
+            char c;
+            if (get_byte_stream_element_char(elem, &c))
+            {
+                printf("Type = CHAR, Value = %c", c);
+            }
+        }
+        else if (is_byte_stream_element_int32(elem))
+        {
+            int32_t val;
+            if (get_byte_stream_element_int32(elem, &val))
+            {
+                printf("Type = INT32, Value = %d", val);
+            }
+        }
+        else if (is_byte_stream_element_uint32(elem))
+        {
+            uint32_t val;
+            if (get_byte_stream_element_uint32(elem, &val))
+            {
+                printf("Type = UINT32, Value = %u", val);
+            }
+        }
+        // Add other types similarly if needed (float, double, int64, etc.)
+        printf("\n");
+
+        release_byte_stream_element(elem);
+        free(name);
+    }
+
+    release_byte_stream_elements(elements);
+}
+
+void add_student_action_handler(tcp_action_request *request, tcp_action_response *response)
 {
     uint32_t roll_number;
     char *name;
@@ -1659,6 +1724,7 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
         release_tcp_action_response(response);
         return;
     }
+    // printf("Checker\n");
 
     if (!tcp_action_request_name_exists(request, "Gender"))
     {
@@ -1670,6 +1736,7 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
         release_tcp_action_response(response);
         return;
     }
+    // printf("Checker\n");
 
     if (!tcp_action_request_name_exists(request, "Age"))
     {
@@ -1681,6 +1748,7 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
         release_tcp_action_response(response);
         return;
     }
+    // printf("Checker\n");
 
     roll_number = tcp_action_request_get_uint32(request, "RollNumber");
     if (tcp_action_request_failed(request))
@@ -1707,6 +1775,7 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
     }
 
     name = tcp_action_request_get_string(request, "Name");
+    // printf("checker %s\n", name);
     if (tcp_action_request_failed(request))
     {
         tcp_action_request_error(request, &error_string);
@@ -1729,8 +1798,10 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
         release_tcp_action_response(response);
         return;
     }
+    // printf("name : %s", name);
 
     gender = tcp_action_request_get_char(request, "Gender");
+    // printf("Hii Swayam kesa hee ?%c\n", gender);
     if (tcp_action_request_failed(request))
     {
         tcp_action_request_error(request, &error_string);
@@ -1753,6 +1824,8 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
         release_tcp_action_response(response);
         return;
     }
+    // printf("Gender : %c", gender);
+    // printf("checker");
 
     age = tcp_action_request_get_uint32(request, "Age");
     if (tcp_action_request_failed(request))
@@ -1777,6 +1850,8 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
         release_tcp_action_response(response);
         return;
     }
+
+    // printf("Age is : %d", age);
 
     f = fopen("student.data", "rb");
     if (f != NULL)
@@ -1805,6 +1880,8 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
     free(name);
     s.gender = gender;
     s.age = age;
+    // printf("%d", roll_number);
+    // printf("%s", name);
     f = fopen("student.data", "ab");
     fwrite(&s, sizeof(struct student), 1, f);
     fclose(f);
@@ -1815,14 +1892,13 @@ void add_student_action_hnadler(tcp_action_request *request, tcp_action_response
     release_tcp_action_response(response);
 }
 
-void get_all_students_aciton_handler(tcp_action_request *request, tcp_action_response *response)
+void get_all_students_action_handler(tcp_action_request *request, tcp_action_response *response)
 {
     char field_name[21];
     uint32_t number_of_student;
     FILE *f;
     struct student s;
     int x;
-
     f = fopen("student.data", "rb");
     if (f == NULL)
     {
@@ -1866,6 +1942,96 @@ void get_all_students_aciton_handler(tcp_action_request *request, tcp_action_res
     release_tcp_action_response(response);
 }
 
+void get_student_action_handler(tcp_action_request *request, tcp_action_response *response)
+{
+    FILE *f;
+    struct student s;
+    int found;
+    uint32_t roll_number;
+    char *error_string;
+
+    if (!tcp_action_request_name_exists(request, "RollNumber"))
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "RollNumber is missing");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    roll_number = tcp_action_request_get_uint32(request, "RollNumber");
+    if (tcp_action_request_failed(request))
+    {
+        tcp_action_request_error(request, &error_string);
+        if (error_string)
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting RollNumber : %s\n", error_string);
+            free(error_string);
+        }
+        else
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting RollNumber\n");
+        }
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Unable to extract RollNumber");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    f = fopen("student.data", "rb");
+    if (f == NULL)
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 1 for task done
+        tcp_action_response_set_string(response, "exception", "Invalid Roll Number");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    found = 0;
+    while (1)
+    {
+        fread(&s, sizeof(struct student), 1, f);
+        if (feof(f))
+            break;
+
+        if (s.roll_number == roll_number)
+        {
+            found = 1;
+            break;
+        }
+    }
+    fclose(f);
+
+    if (found)
+    {
+        tcp_action_response_set_uint32(response, "roll_number", roll_number);
+        tcp_action_response_set_string(response, "name", s.name);
+        tcp_action_response_set_char(response, "gender", s.gender);
+        tcp_action_response_set_uint32(response, "age", s.age);
+        tcp_action_response_set_int32(response, "succeeded", 1);
+    }
+    else
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 1 for task done
+        tcp_action_response_set_string(response, "exception", "Invalid Roll Number");
+    }
+
+    send_tcp_action_response(response);
+    tcp_action_request_close(request);
+    release_tcp_action_request(request);
+    release_tcp_action_response(response);
+}
+
 void stop_server_action_handler(tcp_action_request *request, tcp_action_response *response)
 {
 }
@@ -1896,8 +2062,10 @@ int main()
     on_tcp_action_server_started(action_server, server_started_event_handler);
     on_tcp_action_server_stopped(action_server, server_stopped_event_handler);
 
-    tcp_action_server_add_action_mapping(action_server, "AddStudent", add_student_action_hnadler);
-    tcp_action_server_add_action_mapping(action_server, "GetAllStudents", get_all_students_aciton_handler);
+    tcp_action_server_add_action_mapping(action_server, "GetAllStudents", get_all_students_action_handler);
+    tcp_action_server_add_action_mapping(action_server, "AddStudent", add_student_action_handler);
+    tcp_action_server_add_action_mapping(action_server, "GetStudent", get_student_action_handler);
+
     tcp_action_server_add_action_mapping(action_server, "StopServer", stop_server_action_handler);
 
     start_tcp_action_server(action_server);
