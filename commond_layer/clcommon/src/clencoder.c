@@ -970,7 +970,7 @@ int get_byte_stream_element_string(byte_stream_element *element, char **ptr2str)
     }
 
     memcpy(str, element->value, element->value_len);
-    str[element->name_len] = '\0';
+    str[element->value_len] = '\0';
     *ptr2str = str;
 
     return 1;
@@ -1079,7 +1079,7 @@ int get_byte_stream_element_uint32(byte_stream_element *element, uint32_t *ptr)
     if (element->type != uint32_e)
         return 0;
 
-    memcpy(&norder_value, element->value, element->value_len);
+    memcpy(&norder_value, element->value, sizeof(uint32_t));
     value = ntohl(norder_value);
     memcpy(ptr, &value, sizeof(uint32_t));
     return 1;
