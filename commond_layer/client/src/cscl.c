@@ -1543,22 +1543,311 @@ void add_student()
 
 void edit_student()
 {
+    int found;
+    uint32_t succeeded;
+    uint32_t rollNumber;
+    char *name;
+    uint32_t age;
+    char gender;
 
-    // ask for roll number
-    // connect
-    //  prepare request will roll number and action name as GetStudetn
-    // send request and receive response
-    // if succeeded is 0 the print exception and story ends
-    // if succeeded is 1 then
-    //              extract anme , age and gender from response
-    //              print name , age and gender
-    //              ask if want to edit , if no then story ends
-    //              if yes then procceds
-    //              ask for new name , new age and new gender
-    //              prepare request with rollnumber , name , gender ,age . Set the action name to UpdateStudent
-    //              send request
-    //              receive response and parse the succeeded part as done earlier
-    //      Note : dont forget to disconnect and release resources
+    char new_name[22];
+    uint32_t new_age;
+    char new_gender;
+
+    char m;
+    tcp_connection *connection;
+    char *err_str;
+    tcp_connection_request *request;
+    tcp_connection_response *response;
+
+    printf("Student Master (Update)\n");
+    printf("Enter roll number : ");
+    scanf("%" SCNu32, &rollNumber);
+    fpurge(stdin);
+
+    // logic to search roll number start here
+    found = 0;
+    connection = tcp_connect("localhost", 6060);
+
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &err_str);
+        if (err_str)
+        {
+            printf("Unable to connect server reason : %s", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to connect server\n");
+        }
+        release_tcp_connection(connection);
+        return;
+    }
+
+    request = create_tcp_connection_request(connection);
+    if (tcp_connection_request_failed(request))
+    {
+        tcp_connection_request_error(request, &err_str);
+        if (err_str)
+        {
+            printf("Unablt to send request : %s\n", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to send request\n");
+        }
+
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_request(request);
+        return;
+    }
+
+    tcp_connection_request_set_action_name(request, "GetStudent");
+    tcp_connection_request_set_uint32(request, "RollNumber", rollNumber);
+
+    tcp_connection_send_request(connection, request);
+    if (tcp_connection_request_failed(request))
+    {
+        tcp_connection_request_error(request, &err_str);
+        if (err_str)
+        {
+            printf("Unable to send request : %s\n", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to send request\n");
+        }
+
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_request(request);
+        return;
+    }
+
+    release_tcp_connection_request(request);
+    // request send , now lets process the response
+
+    response = tcp_connection_receive_response(connection);
+    if (tcp_connection_response_failed(response))
+    {
+        tcp_connection_response_error(response, &err_str);
+        if (err_str)
+        {
+            printf("Unable to receive response , reason : %s\n", err_str);
+        }
+        else
+        {
+            printf("Unable to receive response\n");
+        }
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_response(response);
+        return;
+    }
+
+    if (tcp_connection_response_name_exists(response, "succeeded"))
+    {
+        succeeded = tcp_connection_response_get_int32(response, "succeeded");
+        if (succeeded)
+        {
+            name = tcp_connection_response_get_string(response, "name");
+            gender = tcp_connection_response_get_char(response, "gender");
+            age = tcp_connection_response_get_uint32(response, "age");
+            printf("Name : %s\n", name);
+            if (gender == 'M')
+                printf("Gender : Male\n");
+            if (gender == 'F')
+                printf("Gender : Female\n");
+            printf("Age : %" PRIu32 "\n", age);
+            free(name);
+            found = 1;
+        }
+        else
+        {
+            err_str = tcp_connection_response_get_string(response, "exception");
+            if (err_str)
+            {
+                printf("Unable to get student , reason : %s\n", err_str);
+                free(err_str);
+            }
+            else
+            {
+                printf("Unable to get student\n");
+            }
+        }
+    }
+    else
+    {
+        printf("Invalid response\n");
+    }
+    disconnect_tcp_connection(connection);
+    release_tcp_connection(connection);
+    release_tcp_connection_response(response);
+
+    if (found == 0)
+    {
+        printf("Press Enter to continue....");
+        getchar();
+        fpurge(stdin);
+        return;
+    }
+
+    printf("Edit (Y/N) : ");
+    m = getchar();
+    fpurge(stdin);
+
+    if (m != 'y' && m != 'Y')
+    {
+        printf("Student Not Updated\n");
+        printf("Press Enter to continue....");
+        getchar();
+        fpurge(stdin);
+        return;
+    }
+
+    // logic to search roll number ends here
+
+    printf("Enter name : ");
+    fgets(new_name, 22, stdin);
+    fpurge(stdin);
+    new_name[strlen(new_name) - 1] = '\0';
+
+    printf("Enter gender : ");
+    new_gender = getchar();
+    fpurge(stdin);
+
+    printf("Enter age : ");
+    scanf("%" SCNu32, &new_age);
+    fpurge(stdin);
+
+    printf("Update (Y/N) : ");
+    m = getchar();
+    fpurge(stdin);
+
+    if (m != 'Y' && m != 'y')
+    {
+        printf("Student not updated\n");
+        return;
+    }
+
+    connection = tcp_connect("localhost", 6060);
+
+    if (tcp_connection_failed(connection))
+    {
+        tcp_connection_error(connection, &err_str);
+        if (err_str)
+        {
+            printf("Unable to connect server reason : %s", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to connect server\n");
+        }
+        release_tcp_connection(connection);
+        return;
+    }
+
+    request = create_tcp_connection_request(connection);
+    if (tcp_connection_request_failed(request))
+    {
+        tcp_connection_request_error(request, &err_str);
+        if (err_str)
+        {
+            printf("Unable  to send request : %s\n", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to send request\n");
+        }
+
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_request(request);
+        return;
+    }
+
+    tcp_connection_request_set_action_name(request, "UpdateStudent");
+    tcp_connection_request_set_uint32(request, "RollNumber", rollNumber);
+    tcp_connection_request_set_string(request, "Name", new_name);
+    tcp_connection_request_set_char(request, "Gender", new_gender);
+    tcp_connection_request_set_uint32(request, "Age", new_age);
+
+    tcp_connection_send_request(connection, request);
+    if (tcp_connection_request_failed(request))
+    {
+
+        tcp_connection_request_error(request, &err_str);
+        if (err_str)
+        {
+            printf("Unable to send request : %s\n", err_str);
+            free(err_str);
+        }
+        else
+        {
+            printf("Unable to send request\n");
+        }
+
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_request(request);
+        return;
+    }
+
+    release_tcp_connection_request(request);
+    // request send , now lets process the response
+
+    response = tcp_connection_receive_response(connection);
+    if (tcp_connection_response_failed(response))
+    {
+        tcp_connection_response_error(response, &err_str);
+        if (err_str)
+        {
+            printf("Unable to receive response , reason : %s\n", err_str);
+        }
+        else
+        {
+            printf("Unable to receive response\n");
+        }
+        disconnect_tcp_connection(connection);
+        release_tcp_connection(connection);
+        release_tcp_connection_response(response);
+        return;
+    }
+
+    if (tcp_connection_response_name_exists(response, "succeeded"))
+    {
+        succeeded = tcp_connection_response_get_int32(response, "succeeded");
+        if (succeeded)
+        {
+            printf("Student Updated\n");
+        }
+        else
+        {
+            err_str = tcp_connection_response_get_string(response, "exception");
+            if (err_str)
+            {
+                printf("Unable to update  student , reason : %s\n", err_str);
+                free(err_str);
+            }
+            else
+            {
+                printf("Unable to update student\n");
+            }
+        }
+    }
+    else
+    {
+        printf("Invalid response\n");
+    }
+    disconnect_tcp_connection(connection);
+    release_tcp_connection(connection);
+    release_tcp_connection_response(response);
 }
 void delete_student()
 {
@@ -1584,7 +1873,6 @@ void search_student()
     char *name;
     uint32_t age;
     char gender;
-    char m;
     tcp_connection *connection;
     char *err_str;
     tcp_connection_request *request;
