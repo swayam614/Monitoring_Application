@@ -2032,6 +2032,209 @@ void get_student_action_handler(tcp_action_request *request, tcp_action_response
     release_tcp_action_response(response);
 }
 
+void update_student_action_handler(tcp_action_request *request, tcp_action_response *response)
+{
+    uint32_t roll_number;
+    char *name;
+    char gender;
+    uint32_t age;
+    char *error_string;
+    struct student s;
+    FILE *f;
+    struct student t;
+    int found;
+
+    if (!tcp_action_request_name_exists(request, "RollNumber"))
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "RollNumber is missing");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    if (!tcp_action_request_name_exists(request, "Name"))
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Name is missing");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    if (!tcp_action_request_name_exists(request, "Gender"))
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Gender is missing");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    if (!tcp_action_request_name_exists(request, "Age"))
+    {
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Age is missing");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    roll_number = tcp_action_request_get_uint32(request, "RollNumber");
+    if (tcp_action_request_failed(request))
+    {
+        tcp_action_request_error(request, &error_string);
+        if (error_string)
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting RollNumber : %s\n", error_string);
+            free(error_string);
+        }
+        else
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting RollNumber\n");
+        }
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Unable to extract RollNumber");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    name = tcp_action_request_get_string(request, "Name");
+    if (tcp_action_request_failed(request))
+    {
+        tcp_action_request_error(request, &error_string);
+        if (error_string)
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting Name : %s\n", error_string);
+            free(error_string);
+        }
+        else
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting Name\n");
+        }
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Unable to extract Name ");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+    // printf("name : %s", name);
+
+    gender = tcp_action_request_get_char(request, "Gender");
+    // printf("Hii Swayam kesa hee ?%c\n", gender);
+    if (tcp_action_request_failed(request))
+    {
+        tcp_action_request_error(request, &error_string);
+        if (error_string)
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting Gender : %s\n", error_string);
+            free(error_string);
+        }
+        else
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting Gender\n");
+        }
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Unable to extract Gender");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+    // printf("Gender : %c", gender);
+    // printf("checker");
+
+    age = tcp_action_request_get_uint32(request, "Age");
+    if (tcp_action_request_failed(request))
+    {
+        tcp_action_request_error(request, &error_string);
+        if (error_string)
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting Age : %s\n", error_string);
+            free(error_string);
+        }
+        else
+        {
+            // this is just for debugging , later on instead of printing , it can be logged in a file
+            printf("Error extracting Age\n");
+        }
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Unable to extract Age");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    found = 0;                        // 0 for false
+    f = fopen("student.data", "rb+"); // rb+ for read and update
+    if (f != NULL)
+    {
+        while (1)
+        {
+            fread(&t, sizeof(struct student), 1, f);
+            if (feof(f))
+                break;
+            if (t.roll_number == roll_number)
+            {
+                found = 1;
+                break;
+            }
+        }
+    }
+    if (found == 0)
+    {
+        if (f != NULL)
+            fclose(f);
+        tcp_action_response_set_int32(response, "succeeded", 0); // 0 for failure
+        tcp_action_response_set_string(response, "exception", "Roll Number exists!");
+        send_tcp_action_response(response);
+        tcp_action_request_close(request);
+        release_tcp_action_request(request);
+        release_tcp_action_response(response);
+        return;
+    }
+
+    s.roll_number = roll_number;
+    strcpy(s.name, name);
+    free(name);
+    s.gender = gender;
+    s.age = age;
+    // move the internal pointer back by 1 record
+    fseek(f, sizeof(struct student) * -1, SEEK_CUR); // SEEk_CUR for for current position
+    // now the internal is pointing to the first byte of the record to be updated
+
+    fwrite(&s, sizeof(struct student), 1, f);
+    fclose(f);
+    tcp_action_response_set_int32(response, "succeeded", 1); // 1 for task done
+    send_tcp_action_response(response);
+    tcp_action_request_close(request);
+    release_tcp_action_request(request);
+    release_tcp_action_response(response);
+}
+
 void stop_server_action_handler(tcp_action_request *request, tcp_action_response *response)
 {
 }
@@ -2065,6 +2268,7 @@ int main()
     tcp_action_server_add_action_mapping(action_server, "GetAllStudents", get_all_students_action_handler);
     tcp_action_server_add_action_mapping(action_server, "AddStudent", add_student_action_handler);
     tcp_action_server_add_action_mapping(action_server, "GetStudent", get_student_action_handler);
+    tcp_action_server_add_action_mapping(action_server, "UpdateStudent", update_student_action_handler);
 
     tcp_action_server_add_action_mapping(action_server, "StopServer", stop_server_action_handler);
 
